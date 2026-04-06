@@ -63,7 +63,7 @@
         "editor.defaultFormatter": "vscode.json-language-features"
     },
     "[php]": {
-        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+        "editor.defaultFormatter": "DEVSENSE.phptools-vscode"
     },
     // Disable VS Code automatic formatOnSave for specific file extenssaf
     "files.associations": {

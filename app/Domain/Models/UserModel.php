@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Domain\Models;
+
+use App\Helpers\Core\PDOService;
+use App\Helpers\Core\Service;
+
+class UserModel extends BaseModel
+{
+
+    public function findById(int $id): array|false
+    {
+        return $this->selectOne('SELECT * FROM users WHERE userId = ?', [$id]);
+    }
+
+    public function findByUsername(string $username): array|false
+    {
+        return $this->selectOne('SELECT * FROM users WHERE username = ?', [$username]);
+    }
+
+    public function findByEmail(string $email): array|false
+    {
+        return $this->selectOne('SELECT * FROM users WHERE email = ?', [$email]);
+    }
+
+    public function create(string $username, string $email, string $password): bool
+    {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        return $this->execute(
+            'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
+            [$username, $email, $passwordHash, 'user']
+        );
+    }
+
+    public function update(int $id, string $username, string $email, string $password): bool
+    {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        return $this->execute(
+            'UPDATE users SET username = ?, email = ?, password = ? WHERE userId = ?',
+            [$username, $email, $passwordHash, $id]
+        );
+    }
+
+    public function delete(int $id): bool
+    {
+        return $this->execute('DELETE FROM users WHERE userId = ?', [$id]);
+    }
+    
+    public function promoteUser(int $id): bool
+    {
+        return $this->execute('UPDATE users SET role = ? WHERE userId = ?', ['admin', $id]);
+    }
+}

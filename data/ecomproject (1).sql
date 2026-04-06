@@ -88,14 +88,14 @@ CREATE TABLE `ticket` (
 -- Table structure for table `user`
 --
 
-CREATE TABLE `user` (
-  `userId` int(10) NOT NULL,
+CREATE TABLE `users` (
+  `userId` int NOT NULL,
   `username` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
-  `password` varchar(20) NOT NULL,
-  `twoFactor` varchar(6) NOT NULL,
-  `role` varchar(25) NOT NULL,
-  `created_at` varchar(20) NOT NULL DEFAULT current_timestamp()
+  `password` varchar(255) NOT NULL,
+  `twoFactor` varchar(255) NOT NULL,
+  `role` varchar(25) NOT NULL DEFAULT 'user',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
