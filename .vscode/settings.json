@@ -1,0 +1,136 @@
+{
+    // The following settings are primarily tailored for editing PHP code.
+
+    //-------- Font settings --------
+    "editor.fontLigatures": true,
+    "editor.fontFamily": "'Fira Code', Consolas, Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontWeight": "normal",
+    "editor.fontSize": 24,
+    "editor.lineHeight": 32,
+    // Enable format on save
+    "editor.formatOnSave": true,
+    // Enable word wrap
+    "editor.wordWrap": "on",
+    // Enable code snippets and hover documentation
+    "editor.snippetSuggestions": "top",
+    "editor.hover.enabled": "on",
+    "editor.codeLens": true,
+    "workbench.statusBar.visible": true,
+    // Disable the stupidly annoying hints that show up before variable names.
+    "editor.inlayHints.enabled": "off",
+
+    //-------- Appearance settings --------
+    "editor.guides.bracketPairs": true,
+    "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+    "workbench.iconTheme": "material-icon-theme",
+    "editor.cursorBlinking": "smooth",
+    // Add golden guides to the file explorer view.
+    "workbench.colorCustomizations": {
+        "tree.indentGuidesStroke": "#ffee00",
+        "tree.inactiveIndentGuidesStroke": "#5d5700"
+    },
+    "workbench.tree.renderIndentGuides": "always",
+
+    //-------- Editor-related behaviour settings --------
+    "editor.mouseWheelScrollSensitivity": 3,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "editor.minimap.enabled": false,
+    "editor.cursorSmoothCaretAnimation": "on",
+    "explorer.compactFolders": false,
+    "breadcrumbs.showFunctions": true,
+
+    "composer.bin": "",
+    "git.path": "",
+    "composer.workingPath": "",
+    "editor.mouseWheelZoom": true,
+    "workbench.editor.enablePreview": false,
+
+    //-------- Code formatting settings --------
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[php]": {
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+    },
+    // Disable VS Code automatic formatOnSave for specific file extenssaf
+    "files.associations": {
+        ".htaccess": "plaintext"
+    },
+    "[plaintext]": {
+        "editor.formatOnSave": false
+    },
+
+    //-------- Code Spell Checker Configuration --------
+    // The Language locale to use when spell checking. "en", "en-US" and "en-GB" are currently supported by default.
+    "cSpell.language": "en",
+
+    // Controls the maximum number of spelling errors per document.
+    "cSpell.maxNumberOfProblems": 100,
+
+    // Controls the number of suggestions shown.
+    "cSpell.numSuggestions": 8,
+
+    // The minimum length of a word before checking it against a dictionary.
+    "cSpell.minWordLength": 4,
+
+    // Specify file types to spell check.
+    "cSpell.enabledLanguageIds": [
+        "csharp",
+        "javascript",
+        "markdown",
+        "php",
+        "plaintext",
+        "typescript",
+        "json",
+        "jsonc",
+        "css", // Bruh,how come I forgot CSS?
+        "html",
+        "yml",
+        "sql"
+    ],
+
+    // Enable / Disable the spell checker.
+    "cSpell.enabled": true,
+
+    // Words to add to dictionary for a workspace.
+    "cSpell.words": [],
+
+    // Enable / Disable compound words like 'errormessage'
+    "cSpell.allowCompoundWords": false,
+
+    // Words to be ignored and not suggested.
+    "cSpell.ignoreWords": ["behaviour"],
+
+    // User words to add to dictionary.  Should only be in the user settings.
+    "cSpell.userWords": [],
+
+    // Specify paths/files to ignore.
+    "cSpell.ignorePaths": [
+        "vendor/",
+        "vscode-extension", //
+        ".git" // Ignore the .git directory
+    ],
+    // Set the delay before spell checking the document. Default is 50.
+    "cSpell.spellCheckDelayMs": 50,
+
+    // Set Diagnostic Reporting Level
+    //   Error - Report Spelling Issues as Errors
+    //   Warning - Report Spelling Issues as Warnings
+    //   Information - Report Spelling Issues as Information (default)
+    //   Hint - Report Spelling Issues as Hints, will not show up in Problems
+    "cSpell.diagnosticLevel": "Information",
+    "intelliphp.inlineSuggestionsEnabled": false
+}

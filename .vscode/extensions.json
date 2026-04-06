@@ -1,0 +1,29 @@
+{
+    "recommendations": [
+        "aaron-bond.better-comments",
+        "streetsidesoftware.code-spell-checker",
+        "dbaeumer.vscode-eslint",
+        "evondev.dracula-high-contrast",
+        "htmlhint.vscode-htmlhint",
+        "xabikos.javascriptsnippets",
+        "yzhang.markdown-all-in-one",
+        "bierner.markdown-preview-github-styles",
+        "davidanson.vscode-markdownlint",
+        "pkief.material-icon-theme",
+        "christian-kohler.path-intellisense",
+        "devsense.phptools-vscode",
+        "jaguadoromero.vscode-php-create-class",
+        "rangav.vscode-thunder-client",
+        "enkia.tokyo-night",
+        "vscode-icons-team.vscode-icons",
+        "esbenp.prettier-vscode",
+        "yzane.markdown-pdf",
+        "editorconfig.editorconfig",
+        "ecmel.vscode-html-css",
+        "neilbrayfield.php-docblocker",
+        "alefragnani.bookmarks",
+        "bmewburn.vscode-intelephense-client",
+        "donjayamanne.githistory",
+        "eamodio.gitlens"
+    ]
+}

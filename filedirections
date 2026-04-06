@@ -1,0 +1,27 @@
+slim-mvc/
+├── app/
+│   ├── Controllers/    # Your controllers live here
+│   ├── Domain/         # Domain logic and business rules
+│   │   ├── Models/     # Data models and entities
+│   │   └── Services/   # Business logic services
+│   ├── Helpers/        # Utility classes and helpers
+│   ├── Middleware/     # Custom middleware
+│   ├── Routes/         # Route definitions (web & API)
+│   └── Views/          # Your view templates
+├── config/             # Configuration files and bootstrap
+├── data/               # Database files, uploads, etc.
+├── docker/             # Docker configuration files
+│   ├── apache.conf     # Apache virtual host config
+│   └── init-db/        # Database initialization scripts
+├── docs/               # Documentation
+├── public/             # Web-accessible files
+│   ├── assets/         # Static assets (CSS, JS, images)
+│   │   ├── css/        # Stylesheets
+│   │   └── js/         # JavaScript files
+│   ├── index.php       # Application entry point
+│   └── .htaccess       # Apache rewrite rules
+├── var/                # Runtime files
+│   └── logs/           # Application logs
+├── vendor/             # Composer dependencies
+├── Dockerfile          # Docker image definition
+└── docker-compose.yml  # Docker services configuration
