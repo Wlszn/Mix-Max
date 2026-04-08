@@ -25,3 +25,8 @@ slim-mvc/
 ├── vendor/             # Composer dependencies
 ├── Dockerfile          # Docker image definition
 └── docker-compose.yml  # Docker services configuration
+
+https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/ 
+https://www.reddit.com/r/webdev/comments/1obwkky/whats_the_best_api_for_getting_upcoming_live/ 
+
+Event discovery API to be used 
