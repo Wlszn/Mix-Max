@@ -7,12 +7,11 @@ declare(strict_types=1);
  */
 
 use App\Controllers\HomeController;
+use App\Controllers\EventController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-
 return static function (Slim\App $app): void {
-
 
     //* NOTE: Route naming pattern: [controller_name].[method_name]
     $app->get('/', [HomeController::class, 'index'])
@@ -20,6 +19,12 @@ return static function (Slim\App $app): void {
 
     $app->get('/home', [HomeController::class, 'index'])
         ->setName('home.index');
+
+    $app->get('/events', [EventController::class, 'index'])
+        ->setName('events.index');
+
+    $app->get('/events/{id}', [EventController::class, 'show'])
+        ->setName('events.show');
 
     // A route to display PHP configuration information.
     $app->get('/phpinfo', function (Request $request, Response $response, $args) {

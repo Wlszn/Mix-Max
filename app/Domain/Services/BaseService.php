@@ -15,4 +15,6 @@ class BaseService
     //*NOTES: This class is not used yet. It is a placeholder for future services.
     //*NOTES: Here, you can define common methods for all services such as logging, validation, etc.
 
+    
+
 }

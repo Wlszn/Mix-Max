@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `ecomproject`
+-- Database: `Mix-Max`
 --
 
 -- --------------------------------------------------------
@@ -33,7 +33,6 @@ CREATE TABLE `venue` (
   `address` varchar(200) NOT NULL,
   `city` varchar(50) NOT NULL,
   `capacity` int(10) NOT NULL,
-  --Dont think we need this
   `imageUrl` varchar(255) DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

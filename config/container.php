@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Helpers\Core\AppSettings;
 use App\Helpers\Core\JsonRenderer;
 use App\Helpers\Core\PDOService;
+use App\Domain\Services\EventService;
 use App\Middleware\ExceptionMiddleware;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -78,5 +79,9 @@ $definitions = [
             (bool) $settings['display_error_details'],
         );
     },
+
+    EventService::class => function ($container) {
+    return new EventService($container->get(PDOService::class));
+},
 ];
 return $definitions;

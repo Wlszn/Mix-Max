@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Domain\Services;
+
+use App\Domain\Models\EventModel;
+use App\Helpers\Core\PDOService;
+
+class EventService extends BaseService
+{
+    private EventModel $eventModel;
+
+    public function __construct(PDOService $db_service)
+    {
+        $this->eventModel = new EventModel($db_service);
+    }
+
+    public function createEvent(array $data): int
+    {
+        return $this->eventModel->create($data);
+    }
+
+    public function getAllEvents(): array
+    {
+        return $this->eventModel->findAll();
+    }
+
+    public function getEventById(int $eventId): array|false
+    {
+        return $this->eventModel->findById($eventId);
+    }
+
+    public function searchEvents(string $keyword): array
+    {
+        $keyword = trim($keyword);
+
+        if ($keyword === '') {
+            return $this->getAllEvents();
+        }
+
+        return $this->eventModel->search($keyword);
+    }
+
+    public function updateEvent(int $eventId, array $data): bool
+    {
+        if (!$this->eventModel->findById($eventId)) {
+            return false;
+        }
+
+        return $this->eventModel->update($eventId, $data);
+    }
+
+    public function deleteEvent(int $eventId): bool
+    {
+        if (!$this->eventModel->findById($eventId)) {
+            return false;
+        }
+
+        return $this->eventModel->delete($eventId);
+    }
+}
