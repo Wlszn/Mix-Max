@@ -82,6 +82,7 @@ $definitions = [
 
     EventService::class => function ($container) {
     return new EventService($container->get(PDOService::class));
+
 },
 ];
 return $definitions;

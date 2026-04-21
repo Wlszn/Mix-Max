@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($event['title'] ?? 'Event Details') ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-<div class="container py-4">
-    <a href="/events" class="btn btn-secondary mb-3">Back to Events</a>
+    <?php require __DIR__ . '/../common/header.php'; ?>
 
+<div class="container py-4">
     <div class="card shadow-sm">
         <?php if (!empty($event['imageUrl'])): ?>
             <img src="<?= htmlspecialchars($event['imageUrl']) ?>" class="card-img-top" alt="<?= htmlspecialchars($event['title']) ?>">

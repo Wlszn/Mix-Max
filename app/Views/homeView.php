@@ -172,5 +172,6 @@ $categories = [
     </section>
 </div>
 
+<?php require __DIR__ . '/common/footer.php'; ?>
 </body>
 </html>
