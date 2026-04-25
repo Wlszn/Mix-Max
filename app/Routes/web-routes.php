@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 use App\Controllers\HomeController;
 use App\Controllers\EventController;
+use App\Controllers\CartController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -23,8 +24,11 @@ return static function (Slim\App $app): void {
     $app->get('/events', [EventController::class, 'index'])
         ->setName('events.index');
 
-    $app->get('/events/{id}', [EventController::class, 'show'])
-        ->setName('events.show');
+        $app->get('/events/{id}', [EventController::class, 'show'])
+            ->setName('events.show');
+
+    $app->get('/cart', [CartController::class, 'index'])
+        ->setName('cart.index');
 
     // A route to display PHP configuration information.
     $app->get('/phpinfo', function (Request $request, Response $response, $args) {
