@@ -17,35 +17,57 @@ $cart = $cart ?? [];
 
 <?php require __DIR__ . '/../common/header.php'; ?>
 
-<div class="max-w-4xl mx-auto px-4 py-10">
-    <div class="bg-white rounded-xl shadow-sm p-6">
-        <h1 class="text-3xl font-bold text-gray-900 mb-6">Your Cart</h1>
+<div class="flex items-center justify-center min-h-[80vh] px-4">
+    <div class="text-center">
 
         <?php if (empty($cart)): ?>
-            <p class="text-gray-600">Your cart is empty.</p>
 
+            <!-- Icon -->
+            <div class="text-gray-400 text-6xl mb-4">
+                🛒
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-2xl font-semibold text-gray-900 mb-2">
+                Your cart is empty
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="text-gray-500 mb-6">
+                Start browsing events to add tickets to your cart
+            </p>
+
+            <!-- Button -->
             <a href="<?= $basePath ?>/events"
-               class="inline-block mt-6 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
+               class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800">
                 Browse Events
             </a>
-        <?php else: ?>
-            <div class="space-y-4">
-                <?php foreach ($cart as $item): ?>
-                    <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
-                        <div>
-                            <h2 class="text-lg font-semibold text-gray-900">
-                                Ticket
-                            </h2>
 
-                            <p class="text-sm text-gray-600">
-                                Ticket ID:
-                                <?= htmlspecialchars(is_array($item) ? ($item['ticketId'] ?? 'Unknown') : $item) ?>
-                            </p>
+        <?php else: ?>
+
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold text-gray-900 mb-6">Your Cart</h1>
+
+                <div class="space-y-4">
+                    <?php foreach ($cart as $item): ?>
+                        <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-900">
+                                    Ticket
+                                </h2>
+
+                                <p class="text-sm text-gray-600">
+                                    Ticket ID:
+                                    <?= htmlspecialchars(is_array($item) ? ($item['ticketId'] ?? 'Unknown') : $item) ?>
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
+
         <?php endif; ?>
+
     </div>
 </div>
 
