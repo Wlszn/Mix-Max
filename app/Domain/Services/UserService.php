@@ -31,21 +31,23 @@ class UserService extends BaseService
 
     }
 
+    // this returns the user array if it works, or false if it fails
     public function login(string $email, string $password): array|false
     {
         $user = $this->userModel->findByEmail($email);
+ 
         if (!$user) {
-            //throw new Exception("User not found.");
             return false;
         }
-
+ 
         if (!password_verify($password, $user['password'])) {
-            //throw new Exception("Invalid password.");
             return false;
         }
-
-        // Logic to create a session or token for the logged-in user
-        return true;
+ 
+        // Don't expose the password hash to the session
+        unset($user['password'], $user['twoFactor']);
+ 
+        return $user;
     }
 
     public function isAdmin(array $user): bool
