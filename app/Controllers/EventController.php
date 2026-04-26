@@ -45,9 +45,12 @@ class EventController extends BaseController
             return $response->withStatus(404);
         }
 
+        $tickets = $this->eventService->getTicketsByEvent($eventId);
+
         return $this->render($response, 'events/show.php', [
             'page_title' => $event['title'],
-            'event' => $event
+            'event' => $event,
+            'tickets' => $tickets
         ]);
     }
 }

@@ -7,10 +7,18 @@ class EventModel extends BaseModel
     public function findById(int $id): array|false
     {
         return $this->selectOne(
-            'SELECT e.*, v.name as venueName, v.address, v.city, v.capacity
+            'SELECT 
+                e.*, 
+                v.name as venueName, 
+                v.address, 
+                v.city, 
+                v.capacity,
+                MIN(t.price) as startingPrice
              FROM event e
              JOIN venue v ON e.venueId = v.venueId
-             WHERE e.eventId = ?',
+             LEFT JOIN ticket t ON e.eventId = t.eventId
+             WHERE e.eventId = ?
+             GROUP BY e.eventId',
             [$id]
         );
     }
@@ -18,9 +26,15 @@ class EventModel extends BaseModel
     public function findAll(): array
     {
         return $this->selectAll(
-            'SELECT e.*, v.name as venueName, v.city
+            'SELECT 
+                e.*, 
+                v.name as venueName, 
+                v.city,
+                MIN(t.price) as startingPrice
              FROM event e
              JOIN venue v ON e.venueId = v.venueId
+             LEFT JOIN ticket t ON e.eventId = t.eventId
+             GROUP BY e.eventId
              ORDER BY e.date ASC, e.startTime ASC'
         );
     }
@@ -28,10 +42,20 @@ class EventModel extends BaseModel
     public function search(string $keyword): array
     {
         return $this->selectAll(
-            'SELECT e.*, v.name as venueName, v.city
+            'SELECT 
+                e.*, 
+                v.name as venueName, 
+                v.city,
+                MIN(t.price) as startingPrice
              FROM event e
              JOIN venue v ON e.venueId = v.venueId
-             WHERE e.title LIKE ? OR e.artist LIKE ? OR e.description LIKE ? OR v.name LIKE ? OR v.city LIKE ?
+             LEFT JOIN ticket t ON e.eventId = t.eventId
+             WHERE e.title LIKE ? 
+                OR e.artist LIKE ? 
+                OR e.description LIKE ? 
+                OR v.name LIKE ? 
+                OR v.city LIKE ?
+             GROUP BY e.eventId
              ORDER BY e.date ASC, e.startTime ASC',
             ["%{$keyword}%", "%{$keyword}%", "%{$keyword}%", "%{$keyword}%", "%{$keyword}%"]
         );

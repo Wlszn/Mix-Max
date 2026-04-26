@@ -3,15 +3,18 @@
 namespace App\Domain\Services;
 
 use App\Domain\Models\EventModel;
+use App\Domain\Models\TicketModel;
 use App\Helpers\Core\PDOService;
 
 class EventService extends BaseService
 {
     private EventModel $eventModel;
+    private TicketModel $ticketModel;
 
     public function __construct(PDOService $db_service)
     {
         $this->eventModel = new EventModel($db_service);
+        $this->ticketModel = new TicketModel($db_service);
     }
 
     public function createEvent(array $data): int
@@ -27,6 +30,11 @@ class EventService extends BaseService
     public function getEventById(int $eventId): array|false
     {
         return $this->eventModel->findById($eventId);
+    }
+
+    public function getTicketsByEvent(int $eventId): array
+    {
+        return $this->ticketModel->findByEvent($eventId);
     }
 
     public function searchEvents(string $keyword): array
