@@ -171,7 +171,10 @@ $categories = [
         </div>
     </section>
 </div>
-
-<?php require __DIR__ . '/common/footer.php'; ?>
+<footer class="footer">
+    <?php require __DIR__ . '/common/footer.php'; ?>
+</footer>
 </body>
+
+
 </html>
