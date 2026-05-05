@@ -138,3 +138,13 @@ INSERT INTO users (username, email, password, twoFactor, role) VALUES
     '',
     'user'
 );
+
+ALTER TABLE event
+ADD COLUMN createdByUserId INT NULL AFTER venueId,
+ADD CONSTRAINT event_createdByUserFK
+FOREIGN KEY (createdByUserId) REFERENCES users(userId)
+ON DELETE SET NULL;
+
+ALTER TABLE event
+MODIFY status enum('pending','scheduled','cancelled','postponed','completed','rejected')
+NOT NULL DEFAULT 'pending';

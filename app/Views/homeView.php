@@ -8,11 +8,12 @@ $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
 
 $featuredEvents = $featuredEvents ?? [];
 $categories = [
-    ['name' => 'Concerts', 'color' => 'bg-purple-500', 'link' => $basePath . '/events?category=concert'],
-    ['name' => 'Sports',   'color' => 'bg-blue-500',   'link' => $basePath . '/events?category=sports'],
-    ['name' => 'Theater',  'color' => 'bg-pink-500',   'link' => $basePath . '/events?category=theater'],
-    ['name' => 'Comedy',   'color' => 'bg-orange-500', 'link' => $basePath . '/events?category=comedy']
+    ['name' => 'Concerts', 'icon' => '♪', 'link' => $basePath . '/events?category=concert'],
+    ['name' => 'Sports', 'icon' => '◉', 'link' => $basePath . '/events?category=sports'],
+    ['name' => 'Theater', 'icon' => '▣', 'link' => $basePath . '/events?category=theater'],
+    ['name' => 'Comedy', 'icon' => '☺', 'link' => $basePath . '/events?category=comedy']
 ];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -27,83 +28,176 @@ $categories = [
 <?php require __DIR__ . '/common/header.php'; ?>
 
 <div class="min-h-screen bg-gray-50">
-    <section class="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-            <div class="text-center">
-                <h1 class="text-5xl md:text-6xl mb-6 font-bold">
-                    Discover Amazing Events
-                </h1>
-                <p class="text-xl md:text-2xl mb-8 text-blue-100">
-                    Book tickets to concerts, sports, theater shows, and more
+    <section class="relative overflow-hidden bg-[#0b1020] text-white">
+    <!-- Background glow -->
+    <div class="absolute inset-0">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-600 rounded-full blur-3xl opacity-25"></div>
+        <div class="absolute top-16 right-10 w-[520px] h-[520px] bg-purple-700 rounded-full blur-3xl opacity-25"></div>
+        <div class="absolute bottom-0 left-1/3 w-80 h-80 bg-pink-500 rounded-full blur-3xl opacity-10"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+            <!-- Left content -->
+            <div>
+                <p class="text-blue-300 font-semibold mb-4">
+                    Live events. Local shows. Real tickets.
                 </p>
-                <a
-                    href="<?= $basePath ?>/events"
-                    class="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
-                >
-                    Browse All Events
-                </a>
+
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6">
+                    Discover Events.
+                    <span class="block">Create Moments.</span>
+                </h1>
+
+                <p class="text-lg md:text-xl text-slate-300 mb-8 max-w-xl leading-relaxed">
+                    Browse concerts, sports, theater, comedy nights, and community events.
+                    Buy tickets or host your own event with Mix Max.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-4 mb-10">
+                    <a href="<?= $basePath ?>/events"
+                       class="inline-flex justify-center items-center bg-blue-600 hover:bg-blue-700 text-white px-7 py-3 rounded-xl font-semibold transition-colors shadow-lg shadow-blue-900/30">
+                        Browse Events →
+                    </a>
+
+                    <?php if (isset($_SESSION['user'])): ?>
+                        <a href="<?= $basePath ?>/events/create"
+                           class="inline-flex justify-center items-center border border-white/40 text-white hover:bg-white hover:text-slate-950 px-7 py-3 rounded-xl font-semibold transition-colors">
+                            Host an Event
+                        </a>
+                    <?php else: ?>
+                        <a href="<?= $basePath ?>/register"
+                           class="inline-flex justify-center items-center border border-white/40 text-white hover:bg-white hover:text-slate-950 px-7 py-3 rounded-xl font-semibold transition-colors">
+                            Start Hosting
+                        </a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Stats like the auction screenshot -->
+                <div class="grid grid-cols-3 gap-6 max-w-md">
+                    <div>
+                        <p class="text-3xl font-bold text-blue-400">500+</p>
+                        <p class="text-sm text-slate-400">Events Listed</p>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-bold text-purple-400">10K+</p>
+                        <p class="text-sm text-slate-400">Tickets Booked</p>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-bold text-pink-400">24/7</p>
+                        <p class="text-sm text-slate-400">Online Access</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
 
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 class="text-3xl mb-8 text-gray-900 font-bold">Browse by Category</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <?php foreach ($categories as $category): ?>
-                <a
-                    href="<?= htmlspecialchars($category['link']) ?>"
-                    class="<?= htmlspecialchars($category['color']) ?> text-white p-6 rounded-lg hover:opacity-90 transition-opacity flex flex-col items-center justify-center gap-3"
-                >
-                    <?php
-                    $icons = [
-                        'Concerts' => '<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                        'Sports'   => '<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 2v20M2 12h20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                        'Theater'  => '<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 21h8M12 17v4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-                        'Comedy'   => '<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-                    ];
-                    echo $icons[$category['name']];
-                    ?>
-                    <span class="text-lg font-semibold"><?= htmlspecialchars($category['name']) ?></span>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    </section>
+            <!-- Right visual -->
+            <div class="relative hidden lg:block">
+                <div class="absolute inset-0 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-[3rem] blur-2xl opacity-30"></div>
 
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="relative bg-white/10 border border-white/20 backdrop-blur-xl rounded-[3rem] p-8 shadow-2xl">
+                    <div class="relative aspect-square rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-blue-950 to-purple-950 overflow-hidden flex items-center justify-center">
+
+                        <div class="absolute w-80 h-80 bg-blue-500/20 rounded-full"></div>
+                        <div class="absolute w-56 h-56 bg-purple-500/20 rounded-full right-8 top-10"></div>
+
+                        <!-- Large headphones icon -->
+                        <svg class="relative w-72 h-72 text-white drop-shadow-2xl" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"
+                                  d="M4 13v4a3 3 0 0 0 3 3h1v-8H7a3 3 0 0 0-3 3zm16 0v4a3 3 0 0 1-3 3h-1v-8h1a3 3 0 0 1 3 3z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"
+                                  d="M4 13a8 8 0 0 1 16 0" />
+                        </svg>
+
+                        <div class="absolute left-6 bottom-6 bg-white text-slate-950 rounded-2xl p-4 shadow-xl w-56">
+                            <p class="text-xs uppercase tracking-wide text-slate-500 font-semibold">Featured Event</p>
+                            <h3 class="font-bold text-lg mt-1">
+                                <?= htmlspecialchars($featuredEvents[0]['title'] ?? 'Live Concert Night') ?>
+                            </h3>
+                            <p class="text-sm text-slate-500 mt-1">
+                                <?= htmlspecialchars($featuredEvents[0]['venueName'] ?? 'Mix Max Arena') ?>
+                            </p>
+                        </div>
+
+                        <div class="absolute right-6 top-6 bg-blue-600 text-white rounded-2xl p-4 shadow-xl">
+                            <p class="text-xs text-blue-100">Tickets from</p>
+                            <p class="text-2xl font-bold">$45</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+    <section class="bg-white py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8">
-            <h2 class="text-3xl text-gray-900 font-bold">Featured Events</h2>
+            <h2 class="text-3xl font-bold text-slate-950">Browse Categories</h2>
             <a href="<?= $basePath ?>/events" class="text-blue-600 hover:text-blue-700 font-semibold">
                 View All →
             </a>
         </div>
 
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <?php foreach ($categories as $category): ?>
+                <a href="<?= htmlspecialchars($category['link']) ?>"
+                   class="group border border-slate-200 bg-white hover:bg-slate-950 hover:border-slate-950 rounded-2xl p-8 text-center transition-all shadow-sm hover:shadow-xl">
+                    <div class="text-4xl text-blue-600 group-hover:text-white mb-3">
+                        <?= htmlspecialchars($category['icon']) ?>
+                    </div>
+                    <p class="font-semibold text-slate-900 group-hover:text-white">
+                        <?= htmlspecialchars($category['name']) ?>
+                    </p>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+    <section class="bg-slate-50 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl text-slate-950 font-bold">Featured Events</h2>
+            <a href="<?= $basePath ?>/events" class="text-blue-600 hover:text-blue-700 font-semibold">
+                See All →
+            </a>
+        </div>
+
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <?php if (empty($featuredEvents)): ?>
-                <p class="text-gray-600">No featured events available.</p>
+                <p class="text-slate-600">No featured events available.</p>
             <?php else: ?>
                 <?php foreach ($featuredEvents as $event): ?>
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                        <?php if (!empty($event['imageUrl'])): ?>
-                            <img src="<?= htmlspecialchars($event['imageUrl']) ?>"
-                                 alt="<?= htmlspecialchars($event['title']) ?>"
-                                 class="w-full h-48 object-cover">
-                        <?php else: ?>
-                            <div class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
-                                No image
-                            </div>
-                        <?php endif; ?>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition-shadow">
+                        <div class="relative">
+                            <?php if (!empty($event['imageUrl'])): ?>
+                                <img src="<?= htmlspecialchars($event['imageUrl']) ?>"
+                                     alt="<?= htmlspecialchars($event['title']) ?>"
+                                     class="w-full h-52 object-cover">
+                            <?php else: ?>
+                                <div class="w-full h-52 bg-slate-200 flex items-center justify-center text-slate-500">
+                                    No image
+                                </div>
+                            <?php endif; ?>
+
+                            <span class="absolute top-3 left-3 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                FEATURED
+                            </span>
+                        </div>
 
                         <div class="p-5">
-                            <h3 class="text-2xl font-semibold text-gray-900 mb-2">
+                            <h3 class="text-xl font-bold text-slate-950 mb-2">
                                 <?= htmlspecialchars($event['title']) ?>
                             </h3>
 
-                            <p class="text-gray-600 mb-2">
+                            <p class="text-slate-600 mb-3">
                                 <?= htmlspecialchars($event['artist']) ?>
                             </p>
 
                             <?php if (!empty($event['date'])): ?>
-                                <p class="text-sm text-gray-500 mb-1">
+                                <p class="text-sm text-slate-500 mb-1">
                                     <?= htmlspecialchars($event['date']) ?>
                                     <?php if (!empty($event['startTime'])): ?>
                                         at <?= htmlspecialchars($event['startTime']) ?>
@@ -112,7 +206,7 @@ $categories = [
                             <?php endif; ?>
 
                             <?php if (!empty($event['venueName'])): ?>
-                                <p class="text-sm text-gray-500 mb-4">
+                                <p class="text-sm text-slate-500 mb-4">
                                     <?= htmlspecialchars($event['venueName']) ?>
                                     <?php if (!empty($event['city'])): ?>
                                         , <?= htmlspecialchars($event['city']) ?>
@@ -121,7 +215,7 @@ $categories = [
                             <?php endif; ?>
 
                             <a href="<?= $basePath ?>/events/<?= (int)$event['eventId'] ?>"
-                               class="inline-block text-blue-600 hover:text-blue-700 font-semibold">
+                               class="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold">
                                 View Details →
                             </a>
                         </div>
@@ -129,51 +223,10 @@ $categories = [
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
-    </section>
-
-    <section class="bg-white py-16 mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl text-center mb-12 text-gray-900 font-bold">Why Choose Mix Max?</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl mb-2 text-gray-900 font-semibold">Secure Booking</h3>
-                    <p class="text-gray-600">Safe and secure payment processing for peace of mind</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl mb-2 text-gray-900 font-semibold">Instant Confirmation</h3>
-                    <p class="text-gray-600">Get your tickets instantly via email</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl mb-2 text-gray-900 font-semibold">Best Selection</h3>
-                    <p class="text-gray-600">Access to thousands of events nationwide</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    </div>
+</section>
 </div>
-<footer class="footer">
     <?php require __DIR__ . '/common/footer.php'; ?>
-</footer>
 </body>
 
 

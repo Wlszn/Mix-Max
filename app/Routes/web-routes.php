@@ -16,9 +16,21 @@ return static function (Slim\App $app): void {
     $app->get('/home', [HomeController::class, 'index']);
 
     // ── Events ──────────────────────────────────────────────────────────────
-    $app->get('/events', [EventController::class, 'index'])->setName('events.index');
-    $app->get('/events/{id}', [EventController::class, 'show'])->setName('events.show');
+    // ---- Events ------------------------------------------------
+    $app->get('/events', [EventController::class, 'index'])
+    ->setName('events.index');
 
+    $app->get('/events/search', [EventController::class, 'searchJson'])
+    ->setName('events.search');
+
+    $app->get('/events/create', [EventController::class, 'create'])
+    ->setName('events.create');
+
+    $app->post('/events', [EventController::class, 'store'])
+    ->setName('events.store');
+
+    $app->get('/events/{id}', [EventController::class, 'show'])
+    ->setName('events.show');
     // ── Cart ────────────────────────────────────────────────────────────────
     $app->get('/cart', [CartController::class, 'index'])->setName('cart.index');
 

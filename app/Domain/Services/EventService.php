@@ -22,6 +22,11 @@ class EventService extends BaseService
         return $this->eventModel->create($data);
     }
 
+    public function createUserEvent(array $data, int $userId): int
+{
+    return $this->eventModel->createByUser($data, $userId);
+}
+
     public function getAllEvents(): array
     {
         return $this->eventModel->findAll();
@@ -65,4 +70,15 @@ class EventService extends BaseService
 
         return $this->eventModel->delete($eventId);
     }
+
+    public function liveSearchEvents(string $keyword): array
+{
+    $keyword = trim($keyword);
+
+    if (strlen($keyword) < 2) {
+        return [];
+    }
+
+    return $this->eventModel->liveSearch($keyword);
+}
 }

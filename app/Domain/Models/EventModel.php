@@ -112,4 +112,51 @@ class EventModel extends BaseModel
     {
         return $this->execute('DELETE FROM event WHERE eventId = ?', [$id]);
     }
+
+    public function createByUser(array $data, int $userId): int
+{
+    $this->execute(
+        'INSERT INTO event 
+            (title, artist, description, venueId, createdByUserId, date, startTime, endTime, imageUrl, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+            $data['title'],
+            $data['artist'],
+            $data['description'] ?? null,
+            $data['venueId'],
+            $userId,
+            $data['date'],
+            $data['startTime'],
+            $data['endTime'],
+            $data['imageUrl'] ?? null,
+            'pending'
+        ]
+    );
+
+    return (int) $this->lastInsertId();
+}
+
+public function liveSearch(string $keyword): array
+{
+    return $this->selectAll(
+        'SELECT e.eventId, e.title, e.artist, e.date, e.startTime, e.imageUrl,
+                v.name AS venueName, v.city
+         FROM event e
+         JOIN venue v ON e.venueId = v.venueId
+         WHERE e.title LIKE ?
+            OR e.artist LIKE ?
+            OR e.description LIKE ?
+            OR v.name LIKE ?
+            OR v.city LIKE ?
+         ORDER BY e.date ASC, e.startTime ASC
+         LIMIT 5',
+        [
+            "%{$keyword}%",
+            "%{$keyword}%",
+            "%{$keyword}%",
+            "%{$keyword}%",
+            "%{$keyword}%"
+        ]
+    );
+}
 }

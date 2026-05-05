@@ -53,4 +53,45 @@ class EventController extends BaseController
             'tickets' => $tickets
         ]);
     }
+
+    public function create(Request $request, Response $response): Response
+    {
+        return $this->render($response, 'events/create.php', [
+            'page_title' => 'Create Event'
+        ]);
+    }
+
+    public function store(Request $request, Response $response): Response
+    {
+        $data = (array) $request->getParsedBody();
+
+        $userId = $_SESSION['user']['userId'] ?? null;
+
+        if (!$userId) {
+            return $this->redirect($request, $response, 'home.index');
+        }
+
+        $this->eventService->createUserEvent($data, (int) $userId);
+
+        return $this->redirect($request, $response, 'events.index');
+    }
+
+    public function searchJson(Request $request, Response $response): Response
+{
+    $queryParams = $request->getQueryParams();
+    $keyword = $queryParams['q'] ?? '';
+
+    $events = $this->eventService->liveSearchEvents($keyword);
+
+    $payload = json_encode([
+        'success' => true,
+        'events' => $events
+    ]);
+
+    $response->getBody()->write($payload);
+
+    return $response->withHeader('Content-Type', 'application/json');
+}
+
+
 }
