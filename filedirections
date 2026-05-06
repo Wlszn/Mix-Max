@@ -35,3 +35,5 @@ Twillio API
 Cloudinary API
 Stripe API
 Backboard.io API 
+
+composer require cloudinary/cloudinary_php

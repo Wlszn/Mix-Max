@@ -16,7 +16,6 @@ return static function (Slim\App $app): void {
     $app->get('/home', [HomeController::class, 'index']);
 
     // ── Events ──────────────────────────────────────────────────────────────
-    // ---- Events ------------------------------------------------
     $app->get('/events', [EventController::class, 'index'])
     ->setName('events.index');
 

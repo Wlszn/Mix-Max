@@ -74,7 +74,6 @@ $categories = [
                     <?php endif; ?>
                 </div>
 
-                <!-- Stats like the auction screenshot -->
                 <div class="grid grid-cols-3 gap-6 max-w-md">
                     <div>
                         <p class="text-3xl font-bold text-blue-400">500+</p>
@@ -101,7 +100,7 @@ $categories = [
                         <div class="absolute w-80 h-80 bg-blue-500/20 rounded-full"></div>
                         <div class="absolute w-56 h-56 bg-purple-500/20 rounded-full right-8 top-10"></div>
 
-                        <!-- Large headphones icon -->
+                        <!-- Large icon -->
                         <svg class="relative w-72 h-72 text-white drop-shadow-2xl" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"
                                   d="M4 13v4a3 3 0 0 0 3 3h1v-8H7a3 3 0 0 0-3 3zm16 0v4a3 3 0 0 1-3 3h-1v-8h1a3 3 0 0 1 3 3z" />
@@ -228,6 +227,4 @@ $categories = [
 </div>
     <?php require __DIR__ . '/common/footer.php'; ?>
 </body>
-
-
 </html>

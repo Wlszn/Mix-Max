@@ -21,7 +21,7 @@ class CartController extends BaseController
     {
         $cart = $this->cartService->getCart();
 
-        return $this->render($response, 'cart/index.php', [
+        return $this->render($response, 'cart/cart.php', [
             'page_title' => 'Cart',
             'cart' => $cart
         ]);

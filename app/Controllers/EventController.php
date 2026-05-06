@@ -28,7 +28,7 @@ class EventController extends BaseController
             $events = $this->eventService->getAllEvents();
         }
 
-        return $this->render($response, 'events/index.php', [
+        return $this->render($response, 'events/browse.php', [
             'page_title' => 'Events',
             'events' => $events,
             'search' => $search

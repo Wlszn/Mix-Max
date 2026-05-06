@@ -29,7 +29,7 @@ class HomeController extends BaseController
             'featuredEvents' => $featuredEvents
         ];
 
-        return $this->render($response, 'homeView.php', $data);
+        return $this->render($response, 'home.php', $data);
     }
 
     public function error(Request $request, Response $response, array $args = []): Response
