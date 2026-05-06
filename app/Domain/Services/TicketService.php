@@ -15,9 +15,9 @@ class TicketService extends BaseService
         $this->ticketModel = new TicketModel($db_service);
     }
 
-    public function createTicket(int $eventId, int $userId, string $seatNumber): bool
+    public function createTicket(int $eventId, int $userId, string $seatNumber,$rowLetter, $section, $price): bool
     {
-        return $this->ticketModel->create([$eventId, $userId, $seatNumber]);
+        return $this->ticketModel->create([$eventId, $userId, $seatNumber,$rowLetter, $section, $price]);
     }
 
     public function getTicketsByEvent(int $eventId): array
@@ -51,6 +51,7 @@ class TicketService extends BaseService
 
     public function deleteTicket(int $ticketId)
     {
+
         // Logic to delete a ticket
         // This could involve checking if the ticket exists and then deleting it from the database
     }

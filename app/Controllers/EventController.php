@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Domain\Services\EventService;
+use App\Domain\Services\TicketService;
 use DI\Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -10,11 +11,13 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class EventController extends BaseController
 {
     private EventService $eventService;
+    private TicketService $ticketService;
 
     public function __construct(Container $container)
     {
         parent::__construct($container);
         $this->eventService = $container->get(EventService::class);
+        $this->ticketService = $container->get(TicketService::class);
     }
 
     public function index(Request $request, Response $response): Response
@@ -92,6 +95,28 @@ class EventController extends BaseController
 
     return $response->withHeader('Content-Type', 'application/json');
 }
+
+function ticketStorage(Request $request, Response $response, array $args): Response
+{
+    $data = (array) $request->getParsedBody();
+    $userId = $_SESSION['user']['userId'] ?? null;
+    $ticketId = $data['ticketId'] ?? null;
+    $section = $data['section'] ?? null;
+    $rowLetter = $data['rowLetter'] ?? null;
+    $seatNumber = $data['seatNumber'] ?? null;
+    $eventId = $data['eventId'] ?? null;
+    $price = $data['price'] ?? null;
+    
+    if (!$userId) {
+        return $this->redirect($request, $response, 'home.index');
+    }
+    if (!$ticketId || !$section || !$rowLetter || !$seatNumber || !$eventId || !$price) {
+        return $this->redirect($request, $response, 'cart.index');
+    }
+    
+    $this->ticketService->createTicket($eventId, $userId, $seatNumber, $rowLetter, $section, $price);
+    return $this->redirect($request, $response, 'cart.index');
+
 
 
 }
