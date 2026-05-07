@@ -137,5 +137,5 @@ unset($_SESSION['flash_errors'], $_SESSION['flash_old']);
         </div>
     </div>
 </main>
-<?php require __DIR__ . '/common/js-scripts.php'; ?>
+<?php require __DIR__ . '/../common/js-scripts.php'; ?>
 <?php require __DIR__ . '/../common/footer.php'; ?>

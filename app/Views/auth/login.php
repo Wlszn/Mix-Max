@@ -104,5 +104,5 @@ unset($_SESSION['flash_success'], $_SESSION['flash_errors'], $_SESSION['flash_ol
         </div>
     </div>
 </main>
-<?php require __DIR__ . '/common/js-scripts.php'; ?>
+<?php require __DIR__ . '/../common/js-scripts.php'; ?>
 <?php require __DIR__ . '/../common/footer.php'; ?>
