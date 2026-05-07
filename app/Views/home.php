@@ -164,7 +164,7 @@ $categories = [
             </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
     <?php if (empty($featuredEvents)): ?>
         <p class="text-slate-600">No featured events available.</p>
     <?php else: ?>
@@ -190,9 +190,6 @@ $categories = [
                         FEATURED
                     </span>
 
-                    <span class="absolute top-3 right-3 bg-white/90 text-slate-700 w-9 h-9 rounded-full flex items-center justify-center">
-                        ♡
-                    </span>
                 </div>
 
                 <div class="p-4">
@@ -206,7 +203,7 @@ $categories = [
 
                     <div class="space-y-1 text-sm text-slate-500">
                         <p>
-                            📅 <?= htmlspecialchars($event['date']) ?>
+                            <?= htmlspecialchars($event['date']) ?>
                             <?php if (!empty($event['startTime'])): ?>
                                 · <?= htmlspecialchars(substr($event['startTime'], 0, 5)) ?>
                             <?php endif; ?>
@@ -214,7 +211,7 @@ $categories = [
 
                         <?php if (!empty($event['venueName'])): ?>
                             <p>
-                                📍 <?= htmlspecialchars($event['venueName']) ?>
+                                <?= htmlspecialchars($event['venueName']) ?>
                                 <?php if (!empty($event['city'])): ?>
                                     , <?= htmlspecialchars($event['city']) ?>
                                 <?php endif; ?>
