@@ -21,6 +21,8 @@ return static function (Slim\App $app): void {
 
     // ── Cart ────────────────────────────────────────────────────────────────
     $app->get('/cart', [CartController::class, 'index'])->setName('cart.index');
+    $app->post('/cart/add', [CartController::class, 'add'])
+    ->setName('cart.add');
 
     // ── Auth: Login ─────────────────────────────────────────────────────────
     $app->get('/login',  [AuthController::class, 'showLogin'])->setName('auth.login');

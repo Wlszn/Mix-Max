@@ -36,4 +36,20 @@ Cloudinary API
 Stripe API
 Backboard.io API 
 
-composer require cloudinary/cloudinary_php
+Move inline CSS/classes into cleaner structure
+
+Move business logic into services
+
+Create helper functions (base path, formatting, etc.)
+
+Separate seat-selection logic cleanly
+Clean cart/session handling
+Add proper validation structure
+Add flash/error message system
+
+
+Add pagination/load limits
+Add Git commit checkpoints
+Add comments only where necessary
+Remove temporary/test code
+Create environment config cleanup

@@ -2,6 +2,7 @@
 
 namespace App\Domain\Services;
 use App\Helpers\Core\PDOService;
+use App\Domain\Services\TicketService;
 
 class CartService extends BaseService
 {
@@ -18,8 +19,14 @@ class CartService extends BaseService
         }
     }
 
-    public function addToCart(int $ticket): void
+    public function addToCart(array $ticket): void
     {
+        foreach ($_SESSION['cart'] as $item) {
+            if ((int) $item['ticketId'] === (int) $ticket['ticketId']) {
+                return;
+            }
+        }
+
         $_SESSION['cart'][] = $ticket;
     }
 
@@ -46,10 +53,25 @@ class CartService extends BaseService
         $total = 0;
 
         foreach ($_SESSION['cart'] as $item) {
-            $total += (float)$item['price'];
+            $total += (float) $item['price'];
         }
 
         return $total;
+    }
+
+    public function addTicketById(int $ticketId, TicketService $ticketService): void
+    {
+        $ticket = $ticketService->getTicketById($ticketId);
+
+        if (!$ticket) {
+            return;
+        }
+
+        if (!$ticketService->isTicketAvailable($ticketId)) {
+            return;
+        }
+
+        $this->addToCart($ticket);
     }
 
 }

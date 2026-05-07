@@ -1,3 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Mix Max Database Setup + Seed File
+ * Visit: http://localhost/Mix-Max/setup-database.php
+ * This script will create the 'mix-max' database, set up the necessary tables, and insert seed data.
+ */
+
+$host = 'localhost';
+$port = '3306';
+$user = 'root';
+$password = '';
+$dbName = 'mix-max';
+
+try {
+    $pdo = new PDO(
+        "mysql:host=$host;port=$port;charset=utf8mb4",
+        $user,
+        $password,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]
+    );
+
+    $sql = <<<SQL
+DROP DATABASE IF EXISTS `mix-max`;
 CREATE DATABASE `mix-max` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `mix-max`;
 
@@ -130,3 +159,16 @@ INSERT INTO `ticket` (`eventId`, `section`, `rowLetter`, `seatNumber`, `price`) 
 (5, 'Front', 'A', '1', 65.00),
 (5, 'Front', 'A', '2', 65.00),
 (5, 'Rear', 'D', '14', 45.00);
+SQL;
+
+    $pdo->exec($sql);
+
+    echo "<h1>Mix Max database setup completed successfully.</h1>";
+    echo "<p>Database <strong>mix-max</strong> was created with tables and seed data.</p>";
+    echo "<p><strong>Important:</strong> Delete <code>setup-database.php</code> after running it.</p>";
+    echo "<p><a href='/Mix-Max/'>Go to Mix Max</a></p>";
+
+} catch (PDOException $e) {
+    echo "<h1>Database setup failed</h1>";
+    echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
+}

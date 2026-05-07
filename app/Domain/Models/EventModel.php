@@ -240,4 +240,18 @@ class EventModel extends BaseModel
             ]
         );
     }
+
+public function findSimilar(int $eventId, string $category, string $city): array
+{
+    return $this->selectAll(
+        'SELECT e.*, v.name AS venueName, v.city
+         FROM event e
+         JOIN venue v ON e.venueId = v.venueId
+         WHERE e.eventId != ?
+           AND (e.category = ? OR v.city = ?)
+         ORDER BY e.date ASC
+         LIMIT 4',
+        [$eventId, $category, $city]
+    );
+}
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Domain\Services\EventService;
 use DI\Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Domain\Services\EventService;
 
 class HomeController extends BaseController
 {
@@ -21,19 +21,9 @@ class HomeController extends BaseController
 
     public function index(Request $request, Response $response, array $args = []): Response
     {
-        $allEvents = $this->eventService->getAllEvents();
-        $featuredEvents = array_slice($allEvents, 0, 3);
-
-        $data = [
+        return $this->render($response, 'home.php', [
             'page_title' => 'Mix Max - Discover Amazing Events',
-            'featuredEvents' => $featuredEvents
-        ];
-
-        return $this->render($response, 'home.php', $data);
-    }
-
-    public function error(Request $request, Response $response, array $args = []): Response
-    {
-        return $this->render($response, 'errorView.php');
+            'featuredEvents' => $this->eventService->getFeaturedEvents(3)
+        ]);
     }
 }

@@ -1,327 +1,235 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
     ? '/' . APP_ROOT_DIR_NAME
     : '';
 
 $event = $event ?? [];
 $tickets = $tickets ?? [];
+$similarEvents = $similarEvents ?? [];
 
-$sections = ['Orchestra', 'Mezzanine', 'Balcony'];
-$rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-$seatsPerRow = 12;
-
-function detailDate(string $date): string
-{
-    return date('l, F j, Y', strtotime($date));
-}
-
-function detailTime(string $time): string
-{
-    return date('g:i A', strtotime($time));
-}
-
-function detailCategory(array $event): string
-{
-    $text = strtolower(
-        ($event['title'] ?? '') . ' ' .
-        ($event['artist'] ?? '') . ' ' .
-        ($event['description'] ?? '')
-    );
-
-    if (str_contains($text, 'sport') || str_contains($text, 'nba') || str_contains($text, 'lakers') || str_contains($text, 'warriors') || str_contains($text, 'soccer') || str_contains($text, 'hockey')) {
-        return 'sports';
-    }
-
-    if (str_contains($text, 'theater') || str_contains($text, 'theatre') || str_contains($text, 'hamilton') || str_contains($text, 'play')) {
-        return 'theater';
-    }
-
-    if (str_contains($text, 'comedy') || str_contains($text, 'comedian') || str_contains($text, 'chappelle')) {
-        return 'comedy';
-    }
-
-    return 'concert';
-}
-
-function detailCategoryClass(string $category): string
-{
-    return match ($category) {
-        'sports' => 'bg-green-100 text-green-700',
-        'theater' => 'bg-red-100 text-red-700',
-        'comedy' => 'bg-yellow-100 text-yellow-700',
-        default => 'bg-purple-100 text-purple-700',
-    };
-}
-
-$category = detailCategory($event);
-$startingPrice = $event['startingPrice'] ?? 0;
-
-$seatMap = [];
+$groupedSeats = [];
 
 foreach ($tickets as $ticket) {
-    $section = $ticket['section'] ?? '';
-    $row = $ticket['rowLetter'] ?? '';
-    $seat = (string)($ticket['seatNumber'] ?? '');
-
-    if ($section !== '' && $row !== '' && $seat !== '') {
-        $seatMap[$section][$row][$seat] = $ticket;
-    }
+    $section = $ticket['section'] ?? 'General';
+    $row = $ticket['rowLetter'] ?? 'A';
+    $groupedSeats[$section][$row][] = $ticket;
 }
+
+$startingPrice = !empty($tickets)
+    ? min(array_column($tickets, 'price'))
+    : 0;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($event['title'] ?? 'Event Details') ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title><?= htmlspecialchars($event['title'] ?? 'Event Details') ?> - Mix Max</title>
 </head>
-<body class="bg-gray-50">
 
+<body class="bg-white text-slate-950">
 <?php require __DIR__ . '/../common/header.php'; ?>
 
 <main class="max-w-7xl mx-auto px-4 py-8">
-    <a href="<?= $basePath ?>/events" class="inline-block mb-8 font-semibold text-gray-900">
-        ← Back
+
+    <a href="<?= $basePath ?>/events" class="text-sm text-slate-600 hover:text-blue-600">
+        ← Back to events
     </a>
 
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Top Details -->
+    <section class="grid lg:grid-cols-2 gap-8 mt-5 mb-10">
         <div>
             <?php if (!empty($event['imageUrl'])): ?>
                 <img
                     src="<?= htmlspecialchars($event['imageUrl']) ?>"
                     alt="<?= htmlspecialchars($event['title']) ?>"
-                    class="w-full h-[430px] object-cover rounded-xl"
+                    class="w-full h-[430px] object-cover rounded-2xl shadow-sm"
                 >
             <?php else: ?>
-                <div class="w-full h-[430px] bg-gray-200 rounded-xl flex items-center justify-center text-gray-500">
-                    No image
+                <div class="w-full h-[430px] bg-slate-200 rounded-2xl flex items-center justify-center text-slate-500">
+                    No Image
                 </div>
             <?php endif; ?>
         </div>
 
-        <div class="flex flex-col">
-            <div class="flex items-start justify-between gap-4 mb-5">
-                <h1 class="text-4xl font-bold text-gray-900">
-                    <?= htmlspecialchars($event['title'] ?? 'Event') ?>
-                </h1>
-
-                <span class="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg <?= detailCategoryClass($category) ?>">
-                    <?= htmlspecialchars($category) ?>
+        <div>
+            <div class="flex items-center gap-2 mb-3">
+                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">
+                    <?= htmlspecialchars($event['category'] ?? 'event') ?>
+                </span>
+                <span class="text-sm text-slate-500">
+                    <?= htmlspecialchars($event['artist'] ?? '') ?>
                 </span>
             </div>
 
-            <p class="text-xl mb-4">
-                📅 <?= htmlspecialchars(detailDate($event['date'])) ?>
-            </p>
+            <h1 class="text-4xl font-bold mb-4">
+                <?= htmlspecialchars($event['title']) ?>
+            </h1>
 
-            <p class="text-xl mb-4">
-                🕒 <?= htmlspecialchars(detailTime($event['startTime'])) ?>
-            </p>
+            <div class="space-y-3 text-slate-700 mb-8">
+                <p>📅 <?= htmlspecialchars($event['date']) ?></p>
+                <p>🕒 <?= htmlspecialchars(substr($event['startTime'] ?? '', 0, 5)) ?> - <?= htmlspecialchars(substr($event['endTime'] ?? '', 0, 5)) ?></p>
+                <p>📍 <?= htmlspecialchars($event['venueName'] ?? '') ?>, <?= htmlspecialchars($event['city'] ?? '') ?></p>
+            </div>
 
-            <p class="text-xl mb-6">
-                📍 <?= htmlspecialchars($event['venueName'] ?? 'Venue') ?>
-                <?php if (!empty($event['city'])): ?>
-                    , <?= htmlspecialchars($event['city']) ?>
-                <?php endif; ?>
-            </p>
-
-            <div class="border border-blue-200 bg-blue-50 rounded-xl p-6 mt-auto">
-                <p class="text-gray-700 mb-1">Tickets from</p>
-                <p class="text-5xl font-bold text-blue-600">
-                    $<?= htmlspecialchars(number_format((float)$startingPrice, 0)) ?>
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 mb-5">
+                <p class="text-sm text-slate-500">Tickets from</p>
+                <p class="text-4xl font-bold text-blue-600">
+                    $<?= number_format((float)$startingPrice, 2) ?>
                 </p>
             </div>
+
+            <a href="#seats"
+               class="block text-center bg-slate-950 hover:bg-blue-600 text-white py-3 rounded-xl font-semibold transition-colors">
+                Select Tickets
+            </a>
         </div>
     </section>
 
-    <div class="w-full max-w-md bg-gray-200 rounded-xl p-1 grid grid-cols-2 mb-10">
-        <button
-            type="button"
-            id="selectSeatsTab"
-            class="main-tab bg-white rounded-lg text-center py-2 font-semibold"
-            onclick="showMainTab('seats')"
-        >
-            Select Seats
-        </button>
+    <hr class="border-slate-200 mb-10">
 
-        <button
-            type="button"
-            id="eventDetailsTab"
-            class="main-tab rounded-lg text-center py-2 font-semibold"
-            onclick="showMainTab('details')"
-        >
-            Event Details
-        </button>
-    </div>
+    <!-- Event Info + Seats -->
+    <section class="grid lg:grid-cols-3 gap-8 mb-14">
+        <!-- Event Details -->
+        <div class="lg:col-span-1">
+            <h2 class="text-2xl font-bold mb-4">About this event</h2>
 
-    <section id="seatsSection" class="bg-white border border-gray-200 rounded-xl p-6 mb-10">
-        <h2 class="text-2xl font-bold mb-6">Choose Your Seats</h2>
+            <p class="text-slate-600 leading-7 mb-6">
+                <?= nl2br(htmlspecialchars($event['description'] ?? 'No description available.')) ?>
+            </p>
 
-        <div class="flex justify-center gap-2 mb-6">
-            <?php foreach ($sections as $index => $section): ?>
-                <button
-                    type="button"
-                    id="<?= strtolower($section) ?>Tab"
-                    class="zone-tab px-5 py-3 rounded-lg font-semibold border border-gray-300 <?= $index === 0 ? 'bg-black text-white' : 'bg-white text-black' ?>"
-                    onclick="showZone('<?= strtolower($section) ?>')"
-                >
-                    <?= htmlspecialchars($section) ?>
-                </button>
-            <?php endforeach; ?>
-        </div>
+            <div class="grid gap-3">
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">Venue</p>
+                    <p class="font-semibold"><?= htmlspecialchars($event['venueName'] ?? '') ?></p>
+                </div>
 
-        <div class="bg-gray-800 text-white text-center py-4 rounded-lg mb-6">
-            STAGE
-        </div>
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">Address</p>
+                    <p class="font-semibold"><?= htmlspecialchars($event['address'] ?? '') ?></p>
+                </div>
 
-        <?php foreach ($sections as $index => $section): ?>
-            <?php $sectionId = strtolower($section); ?>
-
-            <div
-                id="<?= $sectionId ?>Seats"
-                class="zone-section border border-gray-200 rounded-xl p-6 min-h-[410px] <?= $index === 0 ? '' : 'hidden' ?>"
-            >
-                <h3 class="font-bold text-lg mb-6">
-                    <?= htmlspecialchars($section) ?>
-                </h3>
-
-                <div class="space-y-3">
-                    <?php foreach ($rows as $row): ?>
-                        <div class="flex items-center gap-2">
-                            <span class="w-6 text-gray-700"><?= $row ?></span>
-
-                            <?php for ($seat = 1; $seat <= $seatsPerRow; $seat++): ?>
-                                <?php
-                                $ticket = $seatMap[$section][$row][(string)$seat] ?? null;
-                                $isTaken = $ticket && !empty($ticket['heldUntil']) && strtotime($ticket['heldUntil']) > time();
-
-                                $seatClass = $isTaken
-                                    ? 'bg-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-200 hover:bg-blue-600 hover:text-white';
-                                ?>
-
-                                <button
-                                    type="button"
-                                    class="seat-btn w-8 h-8 rounded <?= $seatClass ?> text-sm"
-                                    <?= $isTaken ? 'disabled' : '' ?>
-                                >
-                                    <?= $seat ?>
-                                </button>
-                            <?php endfor; ?>
-                        </div>
-                    <?php endforeach; ?>
+                <div class="bg-slate-50 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">Category</p>
+                    <p class="font-semibold"><?= htmlspecialchars($event['category'] ?? 'Event') ?></p>
                 </div>
             </div>
-        <?php endforeach; ?>
+        </div>
 
-        <div class="flex justify-center gap-8 mt-8 text-sm">
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 bg-gray-200 rounded inline-block"></span>
-                Available
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 bg-blue-600 rounded inline-block"></span>
-                Selected
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 bg-gray-400 rounded inline-block"></span>
-                Taken
+        <!-- Seats -->
+        <div id="seats" class="lg:col-span-2">
+            <h2 class="text-2xl font-bold mb-4">Choose Your Seats</h2>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <div class="bg-slate-950 text-white text-center py-3 rounded-xl mb-6 font-semibold">
+                    STAGE
+                </div>
+
+                <?php if (empty($groupedSeats)): ?>
+                    <p class="text-slate-500">No tickets available for this event.</p>
+                <?php else: ?>
+                    <?php foreach ($groupedSeats as $sectionName => $rows): ?>
+                        <div class="mb-8">
+                            <h3 class="font-bold mb-4"><?= htmlspecialchars($sectionName) ?></h3>
+
+                            <?php foreach ($rows as $rowLetter => $rowTickets): ?>
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="w-6 text-sm font-semibold text-slate-500">
+                                        <?= htmlspecialchars($rowLetter) ?>
+                                    </span>
+
+                                    <div class="flex flex-wrap gap-2">
+                                        <?php foreach ($rowTickets as $ticket): ?>
+                                            <?php
+                                                $isHeld = !empty($ticket['heldUntil']) && strtotime($ticket['heldUntil']) > time();
+                                            ?>
+
+                                            <?php if ($isHeld): ?>
+                                                <button
+                                                    disabled
+                                                    class="w-9 h-9 rounded-md bg-slate-400 text-white text-sm cursor-not-allowed">
+                                                    <?= htmlspecialchars($ticket['seatNumber']) ?>
+                                                </button>
+                                            <?php else: ?>
+                                                <form method="post" action="<?= $basePath ?>/cart/add" class="inline">
+                                                    <input type="hidden" name="ticketId" value="<?= (int)$ticket['ticketId'] ?>">
+                                                    <button
+                                                        type="submit"
+                                                        class="w-9 h-9 rounded-md bg-slate-100 hover:bg-blue-600 hover:text-white text-sm transition-colors">
+                                                        <?= htmlspecialchars($ticket['seatNumber']) ?>
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endforeach; ?>
+
+                    <div class="flex items-center gap-6 text-sm text-slate-500 pt-4 border-t border-slate-200">
+                        <span class="flex items-center gap-2">
+                            <span class="w-4 h-4 bg-slate-100 border rounded"></span> Available
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <span class="w-4 h-4 bg-blue-600 rounded"></span> Selected
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <span class="w-4 h-4 bg-slate-400 rounded"></span> Taken/Held
+                        </span>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
 
-    <section id="detailsSection" class="hidden bg-white border border-gray-200 rounded-xl p-6 mb-10">
-        <h2 class="text-2xl font-bold mb-6">About This Event</h2>
-
-        <p class="text-gray-700 mb-8">
-            <?= htmlspecialchars($event['description'] ?? 'No description available.') ?>
-        </p>
-
-        <h3 class="text-xl font-bold mb-4">Venue Information</h3>
-
-        <p class="mb-3">
-            <strong>Venue:</strong>
-            <?= htmlspecialchars($event['venueName'] ?? 'Venue') ?>
-        </p>
-
-        <p class="mb-3">
-            <strong>Location:</strong>
-            <?= htmlspecialchars($event['city'] ?? '') ?>
-        </p>
-
-        <p class="mb-3">
-            <strong>Date:</strong>
-            <?= htmlspecialchars(detailDate($event['date'])) ?>
-        </p>
-
-        <p class="mb-6">
-            <strong>Time:</strong>
-            <?= htmlspecialchars(detailTime($event['startTime'])) ?>
-        </p>
-
-        <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-            <strong>Please Note:</strong>
-            All sales are final. No refunds or exchanges. Please arrive 30 minutes before the event starts.
+    <!-- Similar Events -->
+    <section class="mb-14">
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="text-2xl font-bold">Similar Events</h2>
+            <a href="<?= $basePath ?>/events" class="text-blue-600 hover:text-blue-700 font-semibold">
+                View all →
+            </a>
         </div>
+
+        <?php if (empty($similarEvents)): ?>
+            <p class="text-slate-500">No similar events found.</p>
+        <?php else: ?>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <?php foreach ($similarEvents as $similar): ?>
+                    <a href="<?= $basePath ?>/events/<?= (int)$similar['eventId'] ?>"
+                       class="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
+                        <?php if (!empty($similar['imageUrl'])): ?>
+                            <img
+                                src="<?= htmlspecialchars($similar['imageUrl']) ?>"
+                                alt="<?= htmlspecialchars($similar['title']) ?>"
+                                class="w-full h-40 object-cover"
+                            >
+                        <?php endif; ?>
+
+                        <div class="p-4">
+                            <h3 class="font-bold mb-1">
+                                <?= htmlspecialchars($similar['title']) ?>
+                            </h3>
+                            <p class="text-sm text-slate-500 mb-1">
+                                <?= htmlspecialchars($similar['date']) ?>
+                            </p>
+                            <p class="text-sm text-slate-500">
+                                <?= htmlspecialchars($similar['venueName'] ?? '') ?>, <?= htmlspecialchars($similar['city'] ?? '') ?>
+                            </p>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </section>
+
 </main>
-
-<script>
-    function showMainTab(tab) {
-        const seatsSection = document.getElementById('seatsSection');
-        const detailsSection = document.getElementById('detailsSection');
-        const selectSeatsTab = document.getElementById('selectSeatsTab');
-        const eventDetailsTab = document.getElementById('eventDetailsTab');
-
-        if (tab === 'seats') {
-            seatsSection.classList.remove('hidden');
-            detailsSection.classList.add('hidden');
-
-            selectSeatsTab.classList.add('bg-white');
-            eventDetailsTab.classList.remove('bg-white');
-        } else {
-            detailsSection.classList.remove('hidden');
-            seatsSection.classList.add('hidden');
-
-            eventDetailsTab.classList.add('bg-white');
-            selectSeatsTab.classList.remove('bg-white');
-        }
-    }
-
-    function showZone(zone) {
-        document.querySelectorAll('.zone-section').forEach(function (section) {
-            section.classList.add('hidden');
-        });
-
-        document.querySelectorAll('.zone-tab').forEach(function (button) {
-            button.classList.remove('bg-black', 'text-white');
-            button.classList.add('bg-white', 'text-black');
-        });
-
-        document.getElementById(zone + 'Seats').classList.remove('hidden');
-
-        const activeButton = document.getElementById(zone + 'Tab');
-        activeButton.classList.remove('bg-white', 'text-black');
-        activeButton.classList.add('bg-black', 'text-white');
-    }
-
-    document.querySelectorAll('.seat-btn').forEach(function (button) {
-        button.addEventListener('click', function () {
-            if (button.disabled) {
-                return;
-            }
-
-            if (button.classList.contains('bg-blue-600')) {
-                button.classList.remove('bg-blue-600', 'text-white');
-                button.classList.add('bg-gray-200');
-            } else {
-                button.classList.remove('bg-gray-200');
-                button.classList.add('bg-blue-600', 'text-white');
-            }
-        });
-    });
-</script>
-
+<?php require __DIR__ . '/../common/js-scripts.php'; ?>
+<?php require __DIR__ . '/../common/footer.php'; ?>
 </body>
 </html>
