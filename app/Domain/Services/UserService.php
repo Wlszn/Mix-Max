@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Services;
 
 use App\Domain\Models\UserModel;
@@ -11,42 +13,52 @@ class UserService extends BaseService
 
     public function __construct(PDOService $db_service)
     {
-        // Initialize any dependencies or services here
         $this->userModel = new UserModel($db_service);
     }
 
-    public function Register(string $username, string $email, string $password) : bool
+    /**
+     * Register a new user (now includes phone number).
+     */
+    public function Register(string $username, string $email, string $password, string $phone = ''): bool
     {
         if ($this->userModel->findByEmail($email)) {
-            //throw new Exception("Email already in use.");
             return false;
         }
-
         if ($this->userModel->findByUsername($username)) {
-            //throw new Exception("Username already in use.");
             return false;
         }
-
-        return $this->userModel->create($username, $email, $password);
-
+        return $this->userModel->create($username, $email, $password, $phone);
     }
 
-    // this returns the user array if it works, or false if it fails
+    /**
+     * Validate credentials and return the user array (minus password hash),
+     * or false on failure.
+     */
     public function login(string $email, string $password): array|false
     {
         $user = $this->userModel->findByEmail($email);
- 
+
         if (!$user) {
             return false;
         }
- 
         if (!password_verify($password, $user['password'])) {
             return false;
         }
- 
-        // Don't expose the password hash to the session
+
         unset($user['password'], $user['twoFactor']);
- 
+        return $user;
+    }
+
+    /**
+     * Load a user by ID (used after OTP verification to populate the session).
+     */
+    public function getUserById(int $userId): array|false
+    {
+        $user = $this->userModel->findById($userId);
+        if (!$user) {
+            return false;
+        }
+        unset($user['password'], $user['twoFactor']);
         return $user;
     }
 
@@ -55,16 +67,13 @@ class UserService extends BaseService
         return isset($user['role']) && $user['role'] === 'admin';
     }
 
-    public function updateUser(int $userId, array $data)
+    public function updateUser(int $userId, array $data): void
     {
-        // Logic to update an existing user
-        // This could involve checking if the user exists, validating the data, etc.
+        // TODO: implement
     }
 
-    public function deleteUser(int $userId)
+    public function deleteUser(int $userId): void
     {
-        // Logic to delete a user
-        // This could involve checking if the user exists and then deleting them from the database
+        // TODO: implement
     }
-
 }

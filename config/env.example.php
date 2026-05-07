@@ -1,34 +1,27 @@
 <?php
 
 declare(strict_types=1);
+
 /**
- * Environment-specific application configuration.
+ * env.php — copy of env.example.php with your real credentials.
  *
- * You should store all secret information (usernames, passwords, tokens,
- * private keys) here.
- *
- * TODO:
- * -----
- * 1) Within this folder, create a new PHP file called env.php.
- * 2) Copy the contents of this file into env.php.
- * 3) Make sure the env.php file is added to your .gitignore
- *    so it is not checked into version control.
- *
- * NOTE:
- * -----
- * This approach ensures that no sensitive passwords or API keys
- * will ever be included in version control history, reducing the
- * risk of a security breach. It also ensures that production values
- * never have to be shared with all project collaborators.
+ * Add the Twilio block below alongside your existing DB settings.
  */
 
-
 return function (array $settings): array {
-    // Database credentials
+
+    // ── Database ────────────────────────────────────────────────────────────
     $settings['db']['username'] = 'root';
     $settings['db']['database'] = 'Mix-Max';
-    $settings['db']['password'] = '';
+    $settings['db']['password'] = 'root';
 
-    //TODO: Additional settings/configs can be declared here.
+    // ── Twilio Verify ───────────────────────────────────────────────────────
+    // Get these from https://console.twilio.com
+    //   Account SID + Auth Token: top of the Console dashboard
+    //   Verify Service SID: Verify → Services → create a service → copy the SID
+    $settings['twilio']['account_sid']        = 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+    $settings['twilio']['auth_token']         = 'your_auth_token_here';
+    $settings['twilio']['verify_service_sid'] = 'VAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+
     return $settings;
 };

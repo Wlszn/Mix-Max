@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Models;
 
 class UserModel extends BaseModel
@@ -19,13 +21,17 @@ class UserModel extends BaseModel
         return $this->selectOne('SELECT * FROM users WHERE email = ?', [$email]);
     }
 
-    public function create(string $username, string $email, string $password): bool
+    /**
+     * Create a new user. stores the phone number (E.164 format).
+     */
+    public function create(string $username, string $email, string $password, string $phone = ''): bool
     {
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-        return $this->execute(
-            'INSERT INTO users (username, email, password, twoFactor, role) VALUES (?, ?, ?, ?, ?)',
-            [$username, $email, $passwordHash, '', 'user']
+        return (bool) $this->execute(
+            'INSERT INTO users (username, email, password, twoFactor, role, phone)
+             VALUES (?, ?, ?, ?, ?, ?)',
+            [$username, $email, $passwordHash, '', 'user', $phone]
         );
     }
 
@@ -33,20 +39,28 @@ class UserModel extends BaseModel
     {
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-        return $this->execute(
+        return (bool) $this->execute(
             'UPDATE users SET username = ?, email = ?, password = ? WHERE userId = ?',
             [$username, $email, $passwordHash, $id]
         );
     }
 
+    public function updatePhone(int $id, string $phone): bool
+    {
+        return (bool) $this->execute(
+            'UPDATE users SET phone = ? WHERE userId = ?',
+            [$phone, $id]
+        );
+    }
+
     public function delete(int $id): bool
     {
-        return $this->execute('DELETE FROM users WHERE userId = ?', [$id]);
+        return (bool) $this->execute('DELETE FROM users WHERE userId = ?', [$id]);
     }
 
     public function promoteUser(int $id): bool
     {
-        return $this->execute(
+        return (bool) $this->execute(
             'UPDATE users SET role = ? WHERE userId = ?',
             ['admin', $id]
         );
