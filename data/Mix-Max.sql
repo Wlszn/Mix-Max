@@ -19,6 +19,7 @@ CREATE TABLE `users` (
   `email` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `twoFactor` varchar(255) NOT NULL DEFAULT '',
+  `phone` varchar(20) NOT NULL DEFAULT '' COMMENT 'E.164 format, e.g. +15141234567',
   `role` varchar(25) NOT NULL DEFAULT 'user',
   `created_at` timestamp DEFAULT current_timestamp(),
   PRIMARY KEY (`userId`)
