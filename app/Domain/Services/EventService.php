@@ -37,11 +37,6 @@ class EventService extends BaseService
         return $this->eventModel->findById($eventId);
     }
 
-    public function getTicketsByEvent(int $eventId): array
-    {
-        return $this->ticketModel->findByEvent($eventId);
-    }
-
     public function searchEvents(string $keyword): array
     {
         $keyword = trim($keyword);
@@ -91,4 +86,10 @@ class EventService extends BaseService
 
         return $this->eventModel->liveSearch($keyword);
     }
+
+    public function getSimilarEvents(int $eventId, string $category, string $city): array
+    {
+        return $this->eventModel->findSimilar($eventId, $category, $city);
+    }
+
 }

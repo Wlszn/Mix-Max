@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Domain\Services\EventService;
+use App\Domain\Services\TicketService;
 use DI\Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -10,11 +11,12 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class EventController extends BaseController
 {
     private EventService $eventService;
-
+    private TicketService $ticketService;
     public function __construct(Container $container)
     {
         parent::__construct($container);
         $this->eventService = $container->get(EventService::class);
+        $this->ticketService = $container->get(TicketService::class);
     }
 
     public function index(Request $request, Response $response): Response
@@ -43,16 +45,22 @@ class EventController extends BaseController
         $event = $this->eventService->getEventById($eventId);
 
         if (!$event) {
-            $response->getBody()->write('Event not found');
-            return $response->withStatus(404);
+            return $this->render($response->withStatus(404), 'errors/404.php');
         }
 
-        $tickets = $this->eventService->getTicketsByEvent($eventId);
+        $tickets = $this->ticketService->getTicketsByEvent($eventId);
+
+        $similarEvents = $this->eventService->getSimilarEvents(
+        $eventId,
+        $event['category'] ?? '',
+        $event['city'] ?? ''
+    );
 
         return $this->render($response, 'events/show.php', [
             'page_title' => $event['title'],
             'event' => $event,
-            'tickets' => $tickets
+            'tickets' => $tickets,
+            'similarEvents' => $similarEvents
         ]);
     }
 

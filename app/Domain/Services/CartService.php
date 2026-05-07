@@ -18,10 +18,16 @@ class CartService extends BaseService
         }
     }
 
-    public function addToCart(int $ticket): void
-    {
-        $_SESSION['cart'][] = $ticket;
+    public function addToCart(array $ticket): void
+{
+    foreach ($_SESSION['cart'] as $item) {
+        if ((int)$item['ticketId'] === (int)$ticket['ticketId']) {
+            return;
+        }
     }
+
+    $_SESSION['cart'][] = $ticket;
+}
 
     public function getCart(): array
     {

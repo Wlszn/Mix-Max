@@ -164,64 +164,80 @@ $categories = [
             </a>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <?php if (empty($featuredEvents)): ?>
-                <p class="text-slate-600">No featured events available.</p>
-            <?php else: ?>
-                <?php foreach ($featuredEvents as $event): ?>
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition-shadow">
-                        <div class="relative">
-                            <?php if (!empty($event['imageUrl'])): ?>
-                                <img src="<?= htmlspecialchars($event['imageUrl']) ?>"
-                                     alt="<?= htmlspecialchars($event['title']) ?>"
-                                     class="w-full h-52 object-cover">
-                            <?php else: ?>
-                                <div class="w-full h-52 bg-slate-200 flex items-center justify-center text-slate-500">
-                                    No image
-                                </div>
-                            <?php endif; ?>
-
-                            <span class="absolute top-3 left-3 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                FEATURED
-                            </span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <?php if (empty($featuredEvents)): ?>
+        <p class="text-slate-600">No featured events available.</p>
+    <?php else: ?>
+        <?php foreach ($featuredEvents as $event): ?>
+            <a
+                href="<?= $basePath ?>/events/<?= (int)$event['eventId'] ?>"
+                class="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-xl transition-shadow"
+            >
+                <div class="relative">
+                    <?php if (!empty($event['imageUrl'])): ?>
+                        <img
+                            src="<?= htmlspecialchars($event['imageUrl']) ?>"
+                            alt="<?= htmlspecialchars($event['title']) ?>"
+                            class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
+                        >
+                    <?php else: ?>
+                        <div class="w-full h-44 bg-slate-200 flex items-center justify-center text-slate-500">
+                            No Image
                         </div>
+                    <?php endif; ?>
 
-                        <div class="p-5">
-                            <h3 class="text-xl font-bold text-slate-950 mb-2">
-                                <?= htmlspecialchars($event['title']) ?>
-                            </h3>
+                    <span class="absolute top-3 left-3 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        FEATURED
+                    </span>
 
-                            <p class="text-slate-600 mb-3">
-                                <?= htmlspecialchars($event['artist']) ?>
+                    <span class="absolute top-3 right-3 bg-white/90 text-slate-700 w-9 h-9 rounded-full flex items-center justify-center">
+                        ♡
+                    </span>
+                </div>
+
+                <div class="p-4">
+                    <h3 class="font-bold text-base leading-snug mb-2 group-hover:text-blue-600">
+                        <?= htmlspecialchars($event['title']) ?>
+                    </h3>
+
+                    <p class="text-sm text-slate-600 mb-3">
+                        <?= htmlspecialchars($event['artist']) ?>
+                    </p>
+
+                    <div class="space-y-1 text-sm text-slate-500">
+                        <p>
+                            📅 <?= htmlspecialchars($event['date']) ?>
+                            <?php if (!empty($event['startTime'])): ?>
+                                · <?= htmlspecialchars(substr($event['startTime'], 0, 5)) ?>
+                            <?php endif; ?>
+                        </p>
+
+                        <?php if (!empty($event['venueName'])): ?>
+                            <p>
+                                📍 <?= htmlspecialchars($event['venueName']) ?>
+                                <?php if (!empty($event['city'])): ?>
+                                    , <?= htmlspecialchars($event['city']) ?>
+                                <?php endif; ?>
                             </p>
-
-                            <?php if (!empty($event['date'])): ?>
-                                <p class="text-sm text-slate-500 mb-1">
-                                    <?= htmlspecialchars($event['date']) ?>
-                                    <?php if (!empty($event['startTime'])): ?>
-                                        at <?= htmlspecialchars($event['startTime']) ?>
-                                    <?php endif; ?>
-                                </p>
-                            <?php endif; ?>
-
-                            <?php if (!empty($event['venueName'])): ?>
-                                <p class="text-sm text-slate-500 mb-4">
-                                    <?= htmlspecialchars($event['venueName']) ?>
-                                    <?php if (!empty($event['city'])): ?>
-                                        , <?= htmlspecialchars($event['city']) ?>
-                                    <?php endif; ?>
-                                </p>
-                            <?php endif; ?>
-
-                            <a href="<?= $basePath ?>/events/<?= (int)$event['eventId'] ?>"
-                               class="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold">
-                                View Details →
-                            </a>
-                        </div>
+                        <?php endif; ?>
                     </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
+
+                    <div class="mt-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-slate-500">From</p>
+                            <p class="text-xl font-bold text-blue-600">$45</p>
+                        </div>
+
+                        <p class="text-xs text-slate-500">
+                            View details →
+                        </p>
+                    </div>
+                </div>
+            </a>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
+
     </div>
 </section>
 </div>

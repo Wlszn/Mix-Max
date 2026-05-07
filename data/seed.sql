@@ -148,3 +148,6 @@ ON DELETE SET NULL;
 ALTER TABLE event
 MODIFY status enum('pending','scheduled','cancelled','postponed','completed','rejected')
 NOT NULL DEFAULT 'pending';
+
+ALTER TABLE event
+ADD COLUMN category VARCHAR(50) DEFAULT 'concert' AFTER artist;
