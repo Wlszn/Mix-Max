@@ -23,9 +23,9 @@ class EventService extends BaseService
     }
 
     public function createUserEvent(array $data, int $userId): int
-{
-    return $this->eventModel->createByUser($data, $userId);
-}
+    {
+        return $this->eventModel->createByUser($data, $userId);
+    }
 
     public function getAllEvents(): array
     {
@@ -53,6 +53,16 @@ class EventService extends BaseService
         return $this->eventModel->search($keyword);
     }
 
+    public function filterEvents(string $search, string $category, string $date, string $sort): array
+    {
+        $search = trim($search);
+        $category = trim($category);
+        $date = trim($date);
+        $sort = trim($sort);
+
+        return $this->eventModel->findFiltered($search, $category, $date, $sort);
+    }
+
     public function updateEvent(int $eventId, array $data): bool
     {
         if (!$this->eventModel->findById($eventId)) {
@@ -72,13 +82,13 @@ class EventService extends BaseService
     }
 
     public function liveSearchEvents(string $keyword): array
-{
-    $keyword = trim($keyword);
+    {
+        $keyword = trim($keyword);
 
-    if (strlen($keyword) < 2) {
-        return [];
+        if (strlen($keyword) < 2) {
+            return [];
+        }
+
+        return $this->eventModel->liveSearch($keyword);
     }
-
-    return $this->eventModel->liveSearch($keyword);
-}
 }

@@ -20,18 +20,20 @@ class EventController extends BaseController
     public function index(Request $request, Response $response): Response
     {
         $queryParams = $request->getQueryParams();
-        $search = $queryParams['search'] ?? '';
+        $search = trim($queryParams['search'] ?? '');
+        $category = $queryParams['category'] ?? '';
+        $date = $queryParams['date'] ?? '';
+        $sort = $queryParams['sort'] ?? 'ending_soon';
 
-        if (!empty($search)) {
-            $events = $this->eventService->searchEvents($search);
-        } else {
-            $events = $this->eventService->getAllEvents();
-        }
+        $events = $this->eventService->filterEvents($search, $category, $date, $sort);
 
         return $this->render($response, 'events/browse.php', [
             'page_title' => 'Events',
             'events' => $events,
-            'search' => $search
+            'search' => $search,
+            'category' => $category,
+            'date' => $date,
+            'sort' => $sort
         ]);
     }
 
@@ -77,21 +79,19 @@ class EventController extends BaseController
     }
 
     public function searchJson(Request $request, Response $response): Response
-{
-    $queryParams = $request->getQueryParams();
-    $keyword = $queryParams['q'] ?? '';
+    {
+        $queryParams = $request->getQueryParams();
+        $keyword = $queryParams['q'] ?? '';
 
-    $events = $this->eventService->liveSearchEvents($keyword);
+        $events = $this->eventService->liveSearchEvents($keyword);
 
-    $payload = json_encode([
-        'success' => true,
-        'events' => $events
-    ]);
+        $payload = json_encode([
+            'success' => true,
+            'events' => $events
+        ]);
 
-    $response->getBody()->write($payload);
+        $response->getBody()->write($payload);
 
-    return $response->withHeader('Content-Type', 'application/json');
-}
-
-
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 }

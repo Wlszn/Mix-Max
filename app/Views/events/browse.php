@@ -9,6 +9,39 @@ $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
 
 $events = $events ?? [];
 $search = $search ?? '';
+$category = $category ?? '';
+$date = $date ?? '';
+$sort = $sort ?? 'ending_soon';
+
+function eventCategoryUrl(string $basePath, string $category): string
+{
+    if ($category === '') {
+        return $basePath . '/events';
+    }
+
+    return $basePath . '/events?' . http_build_query(['category' => $category]);
+}
+
+function selectedCategory(string $category, string $value): string
+{
+    return $category === $value ? 'selected' : '';
+}
+
+function selectedSort(string $sort, string $value): string
+{
+    return $sort === $value ? 'selected' : '';
+}
+
+function categoryButtonClass(string $category, string $value): string
+{
+    if ($category === $value) {
+        return 'px-3 py-1.5 rounded-full bg-slate-950 text-white text-sm';
+    }
+
+    return 'px-3 py-1.5 rounded-full border border-slate-400 bg-white text-sm hover:bg-slate-100';
+}
+
+$filtersOpen = $search !== '' || $category !== '' || $date !== '';
 ?>
 
 <!DOCTYPE html>
@@ -39,39 +72,49 @@ $search = $search ?? '';
                 ⚙ Filters
             </button>
 
-            <select class="border border-slate-300 bg-white px-3 py-2 rounded-md text-sm">
-                <option>Ending Soon</option>
-                <option>Date: Soonest</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-            </select>
+            <form method="get" action="<?= $basePath ?>/events">
+                <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
+                <input type="hidden" name="category" value="<?= htmlspecialchars($category) ?>">
+                <input type="hidden" name="date" value="<?= htmlspecialchars($date) ?>">
+
+                <select
+                    name="sort"
+                    onchange="this.form.submit()"
+                    class="border border-slate-300 bg-white px-3 py-2 rounded-md text-sm"
+                >
+                    <option value="ending_soon" <?= selectedSort($sort, 'ending_soon') ?>>Ending Soon</option>
+                    <option value="date_soonest" <?= selectedSort($sort, 'date_soonest') ?>>Date: Soonest</option>
+                    <option value="price_low" <?= selectedSort($sort, 'price_low') ?>>Price: Low to High</option>
+                    <option value="price_high" <?= selectedSort($sort, 'price_high') ?>>Price: High to Low</option>
+                </select>
+            </form>
         </div>
     </div>
 
     <!-- Category Buttons -->
     <div class="flex flex-wrap gap-2 mb-5">
-        <a href="<?= $basePath ?>/events"
-           class="px-3 py-1.5 rounded-full bg-slate-950 text-white text-sm">
+        <a href="<?= eventCategoryUrl($basePath, '') ?>"
+           class="<?= categoryButtonClass($category, '') ?>">
             All
         </a>
 
-        <a href="<?= $basePath ?>/events?category=concert"
-           class="px-3 py-1.5 rounded-full border border-slate-400 bg-white text-sm hover:bg-slate-100">
+        <a href="<?= eventCategoryUrl($basePath, 'concert') ?>"
+           class="<?= categoryButtonClass($category, 'concert') ?>">
             🎵 Concerts
         </a>
 
-        <a href="<?= $basePath ?>/events?category=sports"
-           class="px-3 py-1.5 rounded-full border border-slate-400 bg-white text-sm hover:bg-slate-100">
+        <a href="<?= eventCategoryUrl($basePath, 'sports') ?>"
+           class="<?= categoryButtonClass($category, 'sports') ?>">
             🏆 Sports
         </a>
 
-        <a href="<?= $basePath ?>/events?category=theater"
-           class="px-3 py-1.5 rounded-full border border-slate-400 bg-white text-sm hover:bg-slate-100">
+        <a href="<?= eventCategoryUrl($basePath, 'theater') ?>"
+           class="<?= categoryButtonClass($category, 'theater') ?>">
             🎭 Theater
         </a>
 
-        <a href="<?= $basePath ?>/events?category=comedy"
-           class="px-3 py-1.5 rounded-full border border-slate-400 bg-white text-sm hover:bg-slate-100">
+        <a href="<?= eventCategoryUrl($basePath, 'comedy') ?>"
+           class="<?= categoryButtonClass($category, 'comedy') ?>">
             😄 Comedy
         </a>
     </div>
@@ -79,7 +122,7 @@ $search = $search ?? '';
     <!-- Dropdown Filters -->
     <section
         id="filterPanel"
-        class="hidden bg-slate-100 border border-slate-300 rounded-xl p-5 mb-6"
+        class="<?= $filtersOpen ? '' : 'hidden' ?> bg-slate-100 border border-slate-300 rounded-xl p-5 mb-6"
     >
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-bold">Filters</h2>
@@ -87,6 +130,8 @@ $search = $search ?? '';
         </div>
 
         <form method="get" action="<?= $basePath ?>/events" class="grid md:grid-cols-3 gap-4">
+            <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
+
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Search</label>
                 <input
@@ -101,11 +146,11 @@ $search = $search ?? '';
             <div>
                 <label class="block text-sm text-slate-600 mb-1">Category</label>
                 <select name="category" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
-                    <option value="">All Categories</option>
-                    <option value="concert">Concerts</option>
-                    <option value="sports">Sports</option>
-                    <option value="theater">Theater</option>
-                    <option value="comedy">Comedy</option>
+                    <option value="" <?= selectedCategory($category, '') ?>>All Categories</option>
+                    <option value="concert" <?= selectedCategory($category, 'concert') ?>>Concerts</option>
+                    <option value="sports" <?= selectedCategory($category, 'sports') ?>>Sports</option>
+                    <option value="theater" <?= selectedCategory($category, 'theater') ?>>Theater</option>
+                    <option value="comedy" <?= selectedCategory($category, 'comedy') ?>>Comedy</option>
                 </select>
             </div>
 
@@ -114,6 +159,7 @@ $search = $search ?? '';
                 <input
                     type="date"
                     name="date"
+                    value="<?= htmlspecialchars($date) ?>"
                     class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
                 >
             </div>
@@ -187,7 +233,9 @@ $search = $search ?? '';
                         <div class="mt-5 flex items-center justify-between">
                             <div>
                                 <p class="text-xs text-slate-500">From</p>
-                                <p class="text-xl font-bold text-blue-600">$45</p>
+                                <p class="text-xl font-bold text-blue-600">
+                                    $<?= htmlspecialchars(number_format((float)($event['startingPrice'] ?? 0), 0)) ?>
+                                </p>
                             </div>
 
                             <p class="text-xs text-slate-500">
