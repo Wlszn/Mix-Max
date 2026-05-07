@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\Services\EventService;
+use App\Domain\Services\TwilioVerifyService;
 use App\Domain\Services\UserService;
 use App\Helpers\Core\AppSettings;
 use App\Helpers\Core\JsonRenderer;
@@ -22,11 +23,12 @@ use Slim\Psr7\Factory\UriFactory;
 use Slim\Views\PhpRenderer;
 
 $definitions = [
-    AppSettings::class => function () {
+
+    AppSettings::class => function (): AppSettings {
         return new AppSettings(require_once __DIR__ . '/settings.php');
     },
 
-    App::class => function (ContainerInterface $container) {
+    App::class => function (ContainerInterface $container): App {
         $app = AppFactory::createFromContainer($container);
         $app->setBasePath(APP_ROOT_DIR_NAME ? '/' . APP_ROOT_DIR_NAME : '');
         (require_once __DIR__ . '/../app/Routes/web-routes.php')($app);
@@ -47,18 +49,28 @@ $definitions = [
         return new EventService($container->get(PDOService::class));
     },
 
-    // Register UserService so AuthController can pull it from the container
     UserService::class => function (ContainerInterface $container): UserService {
         return new UserService($container->get(PDOService::class));
     },
 
-    // HTTP factories
-    ResponseFactoryInterface::class    => fn() => new ResponseFactory(),
-    ServerRequestFactoryInterface::class => fn() => new ServerRequestFactory(),
-    StreamFactoryInterface::class      => fn() => new StreamFactory(),
-    UriFactoryInterface::class         => fn() => new UriFactory(),
+    // ── Twilio Verify ──────────────────────────────────────────────────────
+    // Reads credentials from $settings['twilio'] set in config/env.php
+    TwilioVerifyService::class => function (ContainerInterface $container): TwilioVerifyService {
+        $twilio = $container->get(AppSettings::class)->get('twilio');
+        return new TwilioVerifyService(
+            $twilio['account_sid']        ?? '',
+            $twilio['auth_token']         ?? '',
+            $twilio['verify_service_sid'] ?? ''
+        );
+    },
 
-    ExceptionMiddleware::class => function (ContainerInterface $container) {
+    // HTTP factories
+    ResponseFactoryInterface::class      => fn() => new ResponseFactory(),
+    ServerRequestFactoryInterface::class => fn() => new ServerRequestFactory(),
+    StreamFactoryInterface::class        => fn() => new StreamFactory(),
+    UriFactoryInterface::class           => fn() => new UriFactory(),
+
+    ExceptionMiddleware::class => function (ContainerInterface $container): ExceptionMiddleware {
         $settings = $container->get(AppSettings::class)->get('error');
         return new ExceptionMiddleware(
             $container->get(ResponseFactoryInterface::class),

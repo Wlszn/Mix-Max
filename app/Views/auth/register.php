@@ -47,9 +47,7 @@ unset($_SESSION['flash_errors'], $_SESSION['flash_old']);
                 <div>
                     <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                     <input
-                        type="text"
-                        id="username"
-                        name="username"
+                        type="text" id="username" name="username"
                         value="<?= htmlspecialchars($old['username'] ?? '') ?>"
                         required
                         class="w-full px-4 py-2.5 rounded-lg border <?= isset($errors['username']) ? 'border-red-400 bg-red-50' : 'border-gray-300' ?> focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
@@ -64,9 +62,7 @@ unset($_SESSION['flash_errors'], $_SESSION['flash_old']);
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
                     <input
-                        type="email"
-                        id="email"
-                        name="email"
+                        type="email" id="email" name="email"
                         value="<?= htmlspecialchars($old['email'] ?? '') ?>"
                         required
                         class="w-full px-4 py-2.5 rounded-lg border <?= isset($errors['email']) ? 'border-red-400 bg-red-50' : 'border-gray-300' ?> focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
@@ -77,13 +73,31 @@ unset($_SESSION['flash_errors'], $_SESSION['flash_old']);
                     <?php endif; ?>
                 </div>
 
+                <!-- Phone -->
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                        Phone number
+                        <span class="text-gray-400 font-normal">(for SMS verification)</span>
+                    </label>
+                    <input
+                        type="tel" id="phone" name="phone"
+                        value="<?= htmlspecialchars($old['phone'] ?? '') ?>"
+                        required
+                        class="w-full px-4 py-2.5 rounded-lg border <?= isset($errors['phone']) ? 'border-red-400 bg-red-50' : 'border-gray-300' ?> focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        placeholder="+15141234567"
+                    >
+                    <?php if (!empty($errors['phone'])): ?>
+                        <p class="mt-1 text-xs text-red-600"><?= htmlspecialchars($errors['phone']) ?></p>
+                    <?php else: ?>
+                        <p class="mt-1 text-xs text-gray-400">Include country code, e.g. +1 for Canada/US</p>
+                    <?php endif; ?>
+                </div>
+
                 <!-- Password -->
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                     <input
-                        type="password"
-                        id="password"
-                        name="password"
+                        type="password" id="password" name="password"
                         required
                         class="w-full px-4 py-2.5 rounded-lg border <?= isset($errors['password']) ? 'border-red-400 bg-red-50' : 'border-gray-300' ?> focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                         placeholder="Min. 8 characters"
@@ -97,9 +111,7 @@ unset($_SESSION['flash_errors'], $_SESSION['flash_old']);
                 <div>
                     <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
                     <input
-                        type="password"
-                        id="confirm_password"
-                        name="confirm_password"
+                        type="password" id="confirm_password" name="confirm_password"
                         required
                         class="w-full px-4 py-2.5 rounded-lg border <?= isset($errors['confirm_password']) ? 'border-red-400 bg-red-50' : 'border-gray-300' ?> focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                         placeholder="Repeat your password"
