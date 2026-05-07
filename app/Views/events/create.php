@@ -21,3 +21,5 @@
         Submit Event
     </button>
 </form>
+
+<?php require __DIR__ . '/../common/js-scripts.php'; ?>

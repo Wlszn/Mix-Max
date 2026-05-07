@@ -15,7 +15,7 @@ class UserService extends BaseService
         $this->userModel = new UserModel($db_service);
     }
 
-    public function Register(string $username, string $email, string $password) : bool
+    public function register(string $username, string $email, string $password) : bool
     {
         if ($this->userModel->findByEmail($email)) {
             //throw new Exception("Email already in use.");

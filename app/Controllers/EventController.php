@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Domain\Services\EventService;
@@ -12,30 +14,29 @@ class EventController extends BaseController
 {
     private EventService $eventService;
     private TicketService $ticketService;
+
     public function __construct(Container $container)
     {
         parent::__construct($container);
+
         $this->eventService = $container->get(EventService::class);
         $this->ticketService = $container->get(TicketService::class);
     }
 
     public function index(Request $request, Response $response): Response
     {
-        $queryParams = $request->getQueryParams();
-        $search = trim($queryParams['search'] ?? '');
-        $category = $queryParams['category'] ?? '';
-        $date = $queryParams['date'] ?? '';
-        $sort = $queryParams['sort'] ?? 'ending_soon';
-
-        $events = $this->eventService->filterEvents($search, $category, $date, $sort);
+        $filters = $this->getEventFilters($request);
+        $events = $this->eventService->filterEvents(
+            $filters['search'],
+            $filters['category'],
+            $filters['date'],
+            $filters['sort']
+        );
 
         return $this->render($response, 'events/browse.php', [
             'page_title' => 'Events',
             'events' => $events,
-            'search' => $search,
-            'category' => $category,
-            'date' => $date,
-            'sort' => $sort
+            ...$filters
         ]);
     }
 
@@ -48,19 +49,15 @@ class EventController extends BaseController
             return $this->render($response->withStatus(404), 'errors/404.php');
         }
 
-        $tickets = $this->ticketService->getTicketsByEvent($eventId);
-
-        $similarEvents = $this->eventService->getSimilarEvents(
-        $eventId,
-        $event['category'] ?? '',
-        $event['city'] ?? ''
-    );
-
         return $this->render($response, 'events/show.php', [
             'page_title' => $event['title'],
             'event' => $event,
-            'tickets' => $tickets,
-            'similarEvents' => $similarEvents
+            'tickets' => $this->ticketService->getTicketsByEvent($eventId),
+            'similarEvents' => $this->eventService->getSimilarEvents(
+                $eventId,
+                $event['category'] ?? '',
+                $event['city'] ?? ''
+            )
         ]);
     }
 
@@ -73,33 +70,42 @@ class EventController extends BaseController
 
     public function store(Request $request, Response $response): Response
     {
-        $data = (array) $request->getParsedBody();
-
         $userId = $_SESSION['user']['userId'] ?? null;
 
         if (!$userId) {
             return $this->redirect($request, $response, 'home.index');
         }
 
-        $this->eventService->createUserEvent($data, (int) $userId);
+        $this->eventService->createUserEvent(
+            (array) $request->getParsedBody(),
+            (int) $userId
+        );
 
         return $this->redirect($request, $response, 'events.index');
     }
 
     public function searchJson(Request $request, Response $response): Response
     {
-        $queryParams = $request->getQueryParams();
-        $keyword = $queryParams['q'] ?? '';
-
+        $keyword = $request->getQueryParams()['q'] ?? '';
         $events = $this->eventService->liveSearchEvents($keyword);
 
-        $payload = json_encode([
+        $response->getBody()->write(json_encode([
             'success' => true,
             'events' => $events
-        ]);
-
-        $response->getBody()->write($payload);
+        ]));
 
         return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    private function getEventFilters(Request $request): array
+    {
+        $queryParams = $request->getQueryParams();
+
+        return [
+            'search' => trim($queryParams['search'] ?? ''),
+            'category' => $queryParams['category'] ?? '',
+            'date' => $queryParams['date'] ?? '',
+            'sort' => $queryParams['sort'] ?? 'ending_soon'
+        ];
     }
 }

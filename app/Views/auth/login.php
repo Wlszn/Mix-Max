@@ -15,7 +15,6 @@ unset($_SESSION['flash_success'], $_SESSION['flash_errors'], $_SESSION['flash_ol
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($page_title ?? 'Sign In') ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
@@ -105,5 +104,5 @@ unset($_SESSION['flash_success'], $_SESSION['flash_errors'], $_SESSION['flash_ol
         </div>
     </div>
 </main>
-
+<?php require __DIR__ . '/common/js-scripts.php'; ?>
 <?php require __DIR__ . '/../common/footer.php'; ?>

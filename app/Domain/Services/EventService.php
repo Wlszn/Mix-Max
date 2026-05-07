@@ -92,4 +92,9 @@ class EventService extends BaseService
         return $this->eventModel->findSimilar($eventId, $category, $city);
     }
 
+    public function getFeaturedEvents(int $limit = 3): array
+    {
+        return array_slice($this->getAllEvents(), 0, $limit);
+    }
+
 }

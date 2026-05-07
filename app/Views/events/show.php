@@ -29,7 +29,6 @@ $startingPrice = !empty($tickets)
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($event['title'] ?? 'Event Details') ?> - Mix Max</title>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-white text-slate-950">
@@ -230,7 +229,7 @@ $startingPrice = !empty($tickets)
     </section>
 
 </main>
-
+<?php require __DIR__ . '/../common/js-scripts.php'; ?>
 <?php require __DIR__ . '/../common/footer.php'; ?>
 </body>
 </html>

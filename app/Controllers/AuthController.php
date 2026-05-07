@@ -113,7 +113,7 @@ class AuthController extends BaseController
             return $this->redirect($request, $response, 'auth.register');
         }
 
-        $result = $this->userService->Register($username, $email, $pass);
+        $result = $this->userService->register($username, $email, $pass);
 
         if ($result === false) {
             $_SESSION['flash_errors'] = ['general' => 'That email or username is already registered.'];

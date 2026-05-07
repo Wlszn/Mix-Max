@@ -11,7 +11,6 @@ $cart = $cart ?? [];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart</title>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
 
@@ -70,5 +69,5 @@ $cart = $cart ?? [];
 
     </div>
 </div>
-
+<?php require __DIR__ . '/../common/js-scripts.php'; ?>
 <?php require __DIR__ . '/../common/footer.php'; ?>

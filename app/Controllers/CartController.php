@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Domain\Services\CartService;
@@ -16,42 +18,27 @@ class CartController extends BaseController
     public function __construct(Container $container)
     {
         parent::__construct($container);
+
         $this->cartService = new CartService();
         $this->ticketService = $container->get(TicketService::class);
     }
 
     public function index(Request $request, Response $response): Response
     {
-        $cart = $this->cartService->getCart();
-
         return $this->render($response, 'cart/cart.php', [
             'page_title' => 'Cart',
-            'cart' => $cart
+            'cart' => $this->cartService->getCart()
         ]);
     }
 
     public function add(Request $request, Response $response): Response
-{
-    $data = $request->getParsedBody();
-    $ticketId = (int)($data['ticketId'] ?? 0);
+    {
+        $ticketId = (int) (($request->getParsedBody()['ticketId'] ?? 0));
 
-    if ($ticketId <= 0) {
+        if ($ticketId > 0) {
+            $this->cartService->addTicketById($ticketId, $this->ticketService);
+        }
+
         return $this->redirect($request, $response, 'cart.index');
     }
-
-    $ticket = $this->ticketService->getTicketById($ticketId);
-
-    if (!$ticket) {
-        return $this->redirect($request, $response, 'cart.index');
-    }
-
-    if (!$this->ticketService->isTicketAvailable($ticketId)) {
-        return $this->redirect($request, $response, 'cart.index');
-    }
-
-    $this->cartService->addToCart($ticket);
-
-    return $this->redirect($request, $response, 'cart.index');
-}
-
 }
