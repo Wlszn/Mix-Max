@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 $host = 'localhost';
 $port = '3306';
-$user = 'root';
+$user = 'mixmax_user';
 $password = '';
 $dbName = 'mix-max';
 
@@ -123,9 +123,9 @@ INSERT INTO `venue` (`name`, `address`, `city`, `capacity`, `imageUrl`) VALUES
 ('Scotiabank Arena', '40 Bay St', 'Toronto', 19800, 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f'),
 ('MetLife Stadium', '1 MetLife Stadium Dr', 'East Rutherford', 82500, 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14');
 
-INSERT INTO `users` (`username`, `email`, `password`, `twoFactor`, `role`) VALUES
-('admin', 'admin@mixmax.com', '\$2y\$10\$wH4O9QmJ0m0aBvFvHqF1VesX2Y9G4JQj8Q8P2I2rYk3l9F3QzQF6K', '', 'admin'),
-('demo_user', 'user@mixmax.com', '\$2y\$10\$wH4O9QmJ0m0aBvFvHqF1VesX2Y9G4JQj8Q8P2I2rYk3l9F3QzQF6K', '', 'user');
+INSERT INTO `users` (`username`, `email`, `password`, `twoFactor`, `phone`, `role`) VALUES
+('admin', 'admin@mixmax.com', '\$2y\$10\$wH4O9QmJ0m0aBvFvHqF1VesX2Y9G4JQj8Q8P2I2rYk3l9F3QzQF6K', '', '123-456-7890', 'admin'),
+('demo_user', 'user@mixmax.com', '\$2y\$10\$wH4O9QmJ0m0aBvFvHqF1VesX2Y9G4JQj8Q8P2I2rYk3l9F3QzQF6K', '', '098-765-4321', 'user');
 
 INSERT INTO `event` (`title`, `artist`, `category`, `description`, `venueId`, `createdByUserId`, `date`, `startTime`, `endTime`, `imageUrl`, `status`) VALUES
 ('The Midnight Tour 2026', 'Arctic Wolves', 'concert', 'A high-energy concert experience featuring the band''s newest album and greatest hits.', 1, NULL, '2026-05-14', '20:00:00', '23:00:00', 'https://images.unsplash.com/photo-1503095396549-807759245b35', 'scheduled'),
