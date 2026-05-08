@@ -25,7 +25,8 @@
         "php-di/php-di": "^7.0",
         "fig/http-message-util": "^1.1",
         "monolog/monolog": "^3.9",
-        "slim/psr7": "^1.8"
+        "slim/psr7": "^1.8",
+        "twilio/sdk": "^8.11"
     },
     "autoload": {
         "psr-4": {
