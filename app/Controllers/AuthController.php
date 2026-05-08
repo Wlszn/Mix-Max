@@ -106,10 +106,10 @@ class AuthController extends BaseController
 
         // ---------------------   If you want to disable OTP for testing, just log the user in directly here:
 
-        $_SESSION['user']          = $user;
-        $_SESSION['cart_count']    = count($_SESSION['cart'] ?? []);
-        $_SESSION['flash_success'] = 'Welcome back, ' . htmlspecialchars($user['username']) . '!';
-        return $this->redirect($request, $response, 'home.index');
+        // $_SESSION['user']          = $user;
+        // $_SESSION['cart_count']    = count($_SESSION['cart'] ?? []);
+        // $_SESSION['flash_success'] = 'Welcome back, ' . htmlspecialchars($user['username']) . '!';
+        // return $this->redirect($request, $response, 'home.index');
 
         // ---------------------   testing on here comment and uncomment the section above to enable OTP again
         
