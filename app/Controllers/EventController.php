@@ -117,6 +117,5 @@ function ticketStorage(Request $request, Response $response, array $args): Respo
     $this->ticketService->createTicket($eventId, $userId, $seatNumber, $rowLetter, $section, $price);
     return $this->redirect($request, $response, 'cart.index');
 
-
-
+}
 }
