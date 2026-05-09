@@ -1,9 +1,17 @@
-window.addEventListener('load', () => {
+function hidePageLoader() {
     const loader = document.getElementById('page-loader');
 
     if (!loader) return;
 
+    loader.classList.add('loader-hidden');
+
     setTimeout(() => {
-        loader.classList.add('loader-hidden');
-    }, 250);
+        loader.style.display = 'none';
+    }, 400);
+}
+
+window.addEventListener('load', () => {
+    setTimeout(hidePageLoader, 250);
 });
+
+setTimeout(hidePageLoader, 3000);
