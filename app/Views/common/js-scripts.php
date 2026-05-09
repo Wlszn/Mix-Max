@@ -12,3 +12,4 @@ $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
 
 <script src="<?= $basePath ?>/assets/js/live-search.js"></script>
 <script src="<?= $basePath ?>/assets/js/filter-toggle.js"></script>
+<script src="<?= $basePath ?>/assets/js/app.js"></script>
