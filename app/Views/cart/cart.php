@@ -59,6 +59,12 @@ $cart = $cart ?? [];
                                     Ticket ID:
                                     <?= htmlspecialchars(is_array($item) ? ($item['ticketId'] ?? 'Unknown') : $item) ?>
                                 </p>
+                                <form method="post" action="<?= $basePath ?>/cart/remove" class="inline">
+                                    <input type="hidden" name="ticketId" value="<?= (int)$item['ticketId'] ?>">
+                                    <button class="mt-2 inline-block bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700">
+                                        Remove
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     <?php endforeach; ?>

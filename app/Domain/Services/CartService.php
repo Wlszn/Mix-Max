@@ -41,6 +41,8 @@ class CartService extends BaseService
             $_SESSION['cart'],
             fn($item) => $item['ticketId'] != $ticketId
         ));
+
+        
     }
 
     public function clearCart(): void

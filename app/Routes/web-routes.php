@@ -23,6 +23,8 @@ return static function (Slim\App $app): void {
     $app->get('/cart', [CartController::class, 'index'])->setName('cart.index');
     $app->post('/cart/add', [CartController::class, 'add'])
     ->setName('cart.add');
+    $app->post('/cart/remove', [CartController::class, 'remove'])
+    ->setName('cart.remove');
 
     // ── Auth: Login ─────────────────────────────────────────────────────────
     $app->get('/login',  [AuthController::class, 'showLogin'])->setName('auth.login');
