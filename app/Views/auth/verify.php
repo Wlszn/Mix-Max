@@ -189,5 +189,5 @@ const timer = setInterval(() => {
 }, 1000);
 <?php endif; ?>
 </script>
-
+<?php require __DIR__ . '/../common/js-scripts.php'; ?>
 <?php require __DIR__ . '/../common/footer.php'; ?>
