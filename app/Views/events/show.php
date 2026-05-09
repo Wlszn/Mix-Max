@@ -76,17 +76,27 @@ $startingPrice = !empty($tickets)
                 <p>📍 <?= htmlspecialchars($event['venueName'] ?? '') ?>, <?= htmlspecialchars($event['city'] ?? '') ?></p>
             </div>
 
-            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 mb-5">
-                <p class="text-sm text-slate-500">Tickets from</p>
-                <p class="text-4xl font-bold text-blue-600">
-                    $<?= number_format((float)$startingPrice, 2) ?>
-                </p>
-            </div>
+    
+                 <div class="border border-blue-200 bg-blue-50 rounded-xl p-6 mt-auto">
+                <div class="flex items-center justify-between gap-6">
+                    <div>
+                        <p class="text-gray-700 mb-1">Tickets from</p>
+                        <p class="text-5xl font-bold text-blue-600">
+                            $<?= htmlspecialchars(number_format((float)$startingPrice, 0)) ?>
+                        </p>
+                    </div>
 
-            <a href="#seats"
-               class="block text-center bg-slate-950 hover:bg-blue-600 text-white py-3 rounded-xl font-semibold transition-colors">
-                Select Tickets
-            </a>
+                    <div>
+                    <button type="button" class="bg-gray-200 text-black px-5 py-3 rounded-lg font-semibold hover:bg-gray-800">
+                        +
+                    </button>
+                    <button type="button" class="bg-blue-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-gray-800">
+                        Buy Tickets
+                    </button>
+                  <button type="button" class="bg-gray-200 text-black px-5 py-3 rounded-lg font-semibold hover:bg-gray-800">
+                        -
+                    </button>
+         
         </div>
     </section>
 
