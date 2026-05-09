@@ -87,16 +87,29 @@ $startingPrice = !empty($tickets)
                     </div>
 
                     <div>
-                    <button type="button" class="bg-gray-200 text-black px-5 py-3 rounded-lg font-semibold hover:bg-gray-800">
-                        +
-                    </button>
-                    <button type="button" class="bg-blue-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-gray-800">
-                        Buy Tickets
-                    </button>
-                  <button type="button" class="bg-gray-200 text-black px-5 py-3 rounded-lg font-semibold hover:bg-gray-800">
-                        -
-                    </button>
-         
+                        <p class="text-gray-700 mb-2">Quantity</p>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="decreaseQty" class="bg-gray-200 text-black px-4 py-3 rounded-lg font-semibold hover:bg-gray-800">
+                                −
+                            </button>
+                            <input id="quantity" type="number" value="1" min="1" class="w-16 text-center border border-slate-300 rounded px-2 py-3">
+                            <button type="button" id="increaseQty" class="bg-gray-200 text-black px-4 py-3 rounded-lg font-semibold hover:bg-gray-800">
+                                +
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                       
+                    </div>
+                </div>
+
+            </div>
+
+            <a href="#seats"
+               class="block text-center bg-slate-950 hover:bg-blue-600 text-white py-3 rounded-xl font-semibold transition-colors">
+                Select Tickets
+            </a>
         </div>
     </section>
 
@@ -240,6 +253,40 @@ $startingPrice = !empty($tickets)
 
 </main>
 <?php require __DIR__ . '/../common/js-scripts.php'; ?>
+<script>
+(function() {
+    const quantityInput = document.getElementById('quantity');
+    const increaseBtn = document.getElementById('increaseQty');
+    const decreaseBtn = document.getElementById('decreaseQty');
+
+    if (!quantityInput || !increaseBtn || !decreaseBtn) {
+        return;
+    }
+
+    const normalizeQuantity = () => {
+        let value = parseInt(quantityInput.value, 10);
+        if (isNaN(value) || value < 1) {
+            value = 1;
+        }
+        quantityInput.value = value;
+    };
+
+    increaseBtn.addEventListener('click', function () {
+        normalizeQuantity();
+        quantityInput.value = parseInt(quantityInput.value, 10) + 1;
+    });
+
+    decreaseBtn.addEventListener('click', function () {
+        normalizeQuantity();
+        const value = parseInt(quantityInput.value, 10);
+        if (value > 1) {
+            quantityInput.value = value - 1;
+        }
+    });
+
+    quantityInput.addEventListener('input', normalizeQuantity);
+})();
+</script>
 <?php require __DIR__ . '/../common/footer.php'; ?>
 </body>
 </html>
