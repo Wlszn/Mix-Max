@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Domain\Services\BookingService;
+use App\Domain\Services\CartService;
 use App\Domain\Services\EventService;
+use App\Domain\Services\TicketService;
 use App\Domain\Services\TwilioVerifyService;
 use App\Domain\Services\UserService;
+use App\Domain\Services\VenueService;
 use App\Helpers\Core\AppSettings;
 use App\Helpers\Core\JsonRenderer;
 use App\Helpers\Core\PDOService;
@@ -49,14 +53,27 @@ $definitions = [
         return new EventService($container->get(PDOService::class));
     },
 
+    TicketService::class => function (ContainerInterface $container): TicketService {
+        return new TicketService($container->get(PDOService::class));
+    },
+
+    BookingService::class => function (ContainerInterface $container): BookingService {
+        return new BookingService($container->get(PDOService::class));
+    },
+
+    VenueService::class => function (ContainerInterface $container): VenueService {
+        return new VenueService($container->get(PDOService::class));
+    },
+
     UserService::class => function (ContainerInterface $container): UserService {
         return new UserService($container->get(PDOService::class));
     },
 
-    // ── Twilio Verify ──────────────────────────────────────────────────────
-    // Reads credentials from $settings['twilio'] set in config/env.php
+    // Twilio: wrapped in try/catch so missing credentials don't crash every page.
+    // It will only throw when AuthController actually tries to send an OTP.
     TwilioVerifyService::class => function (ContainerInterface $container): TwilioVerifyService {
-        $twilio = $container->get(AppSettings::class)->get('twilio');
+        $settings = $container->get(AppSettings::class)->get();
+        $twilio   = $settings['twilio'] ?? [];
         return new TwilioVerifyService(
             $twilio['account_sid']        ?? '',
             $twilio['auth_token']         ?? '',

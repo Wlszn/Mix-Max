@@ -11,8 +11,8 @@ use RuntimeException;
  * No Twilio SDK composer package required.
  *
  * Required env.php entries:
- *   $settings['twilio']['account_sid']      = 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
- *   $settings['twilio']['auth_token']       = 'your_auth_token';
+ *   $settings['twilio']['account_sid']        = 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+ *   $settings['twilio']['auth_token']         = 'your_auth_token';
  *   $settings['twilio']['verify_service_sid'] = 'VAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
  */
 class TwilioVerifyService extends BaseService
@@ -24,30 +24,27 @@ class TwilioVerifyService extends BaseService
 
     public function __construct(string $accountSid, string $authToken, string $serviceSid)
     {
-        if (empty($accountSid) || empty($authToken) || empty($serviceSid)) {
-            throw new RuntimeException(
-                'Twilio credentials are missing. Please set twilio.account_sid, ' .
-                'twilio.auth_token, and twilio.verify_service_sid in config/env.php.'
-            );
-        }
-
+        // Store credentials even if empty — we validate lazily in sendOtp/verifyOtp
+        // so that missing credentials don't crash the DI container on every page load.
         $this->accountSid = $accountSid;
         $this->authToken  = $authToken;
         $this->serviceSid = $serviceSid;
         $this->baseUrl    = "https://verify.twilio.com/v2/Services/{$this->serviceSid}";
     }
 
-    // ─── Send OTP ──────────────────────────────────────────────────────────────
+    // ─── Send OTP ─────────────────────────────────────────────────────────────
 
     /**
      * Send an OTP SMS to the given phone number.
      *
      * @param  string $phoneNumber E.164 format, e.g. "+15141234567"
      * @return bool   true if Twilio accepted the request
-     * @throws RuntimeException on HTTP or API error
+     * @throws RuntimeException on missing credentials or HTTP/API error
      */
     public function sendOtp(string $phoneNumber): bool
     {
+        $this->assertCredentials();
+
         $response = $this->post('/Verifications', [
             'To'      => $phoneNumber,
             'Channel' => 'sms',
@@ -56,7 +53,7 @@ class TwilioVerifyService extends BaseService
         return ($response['status'] ?? '') === 'pending';
     }
 
-    // ─── Verify OTP ────────────────────────────────────────────────────────────
+    // ─── Verify OTP ───────────────────────────────────────────────────────────
 
     /**
      * Check the OTP code submitted by the user.
@@ -67,6 +64,8 @@ class TwilioVerifyService extends BaseService
      */
     public function verifyOtp(string $phoneNumber, string $code): bool
     {
+        $this->assertCredentials();
+
         $response = $this->post('/VerificationCheck', [
             'To'   => $phoneNumber,
             'Code' => $code,
@@ -75,7 +74,17 @@ class TwilioVerifyService extends BaseService
         return ($response['status'] ?? '') === 'approved';
     }
 
-    // ─── Internal HTTP helper ──────────────────────────────────────────────────
+    // ─── Internal helpers ─────────────────────────────────────────────────────
+
+    private function assertCredentials(): void
+    {
+        if (empty($this->accountSid) || empty($this->authToken) || empty($this->serviceSid)) {
+            throw new RuntimeException(
+                'Twilio credentials are missing. Please set twilio.account_sid, ' .
+                'twilio.auth_token, and twilio.verify_service_sid in config/env.php.'
+            );
+        }
+    }
 
     private function post(string $endpoint, array $params): array
     {
