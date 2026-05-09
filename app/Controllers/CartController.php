@@ -41,4 +41,15 @@ class CartController extends BaseController
 
         return $this->redirect($request, $response, 'cart.index');
     }
+
+    public function remove(Request $request, Response $response): Response
+    {
+        $ticketId = (int) (($request->getParsedBody()['ticketId'] ?? 0));
+
+        if ($ticketId > 0) {
+            $this->cartService->removeFromCart($ticketId);
+        }
+
+        return $this->redirect($request, $response, 'cart.index');
+    }
 }
