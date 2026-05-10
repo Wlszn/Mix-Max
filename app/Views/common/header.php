@@ -102,7 +102,7 @@ unset($_SESSION['flash_success']);
                             </div>
 
                             <?php if (($user['role'] ?? '') === 'admin'): ?>
-                                <a href="<?= $basePath ?>/admin"
+                                <a href="<?= $basePath ?>/admin/events"
                                     class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
                                     Admin Dashboard
                                 </a>
