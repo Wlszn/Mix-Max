@@ -9,7 +9,7 @@ $date = $event['date'] ?? '';
 $startTime = $event['startTime'] ?? '';
 $venueName = $event['venueName'] ?? '';
 $city = $event['city'] ?? '';
-$price = $event['minPrice'] ?? $event['price'] ?? 45; 
+$price = $event['startingPrice'] ?? $event['minPrice'] ?? $event['price'] ?? 0; 
 
 // Let's format the date to look nicer (e.g., "Thu, May 14")
 $formattedDate = !empty($date) ? date('D, M j', strtotime($date)) : 'TBA';

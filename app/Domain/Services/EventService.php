@@ -34,7 +34,40 @@ class EventService extends BaseService
             'imageUrl' => null
         ]);
 
-        $imageUrl = $data['imageUrl'] ?? null;
+        $imageUrl = !empty($data['imageUrl']) ? trim($data['imageUrl']) : null;
+
+        $imageUrl = null;
+
+
+        if (
+            isset($files['eventImageFile']) &&
+            $files['eventImageFile']['error'] === UPLOAD_ERR_OK
+        ) {
+            $uploadDir = APP_BASE_DIR_PATH . '/public/uploads/events/';
+
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $extension = pathinfo(
+                $files['eventImageFile']['name'],
+                PATHINFO_EXTENSION
+            );
+
+            $fileName = uniqid('event_', true) . '.' . $extension;
+
+            move_uploaded_file(
+                $files['eventImageFile']['tmp_name'],
+                $uploadDir . $fileName
+            );
+
+            $imageUrl = '/uploads/events/' . $fileName;
+        }
+
+
+        if (!$imageUrl && !empty($data['imageUrl'])) {
+            $imageUrl = trim($data['imageUrl']);
+        }
 
         $eventId = $this->eventModel->createAndReturnId([
             'title' => $data['title'],
