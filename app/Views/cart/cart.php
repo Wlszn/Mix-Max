@@ -59,6 +59,22 @@ $cart = $cart ?? [];
                                     Ticket ID:
                                     <?= htmlspecialchars(is_array($item) ? ($item['ticketId'] ?? 'Unknown') : $item) ?>
                                 </p>
+                                <p class="text-sm text-gray-600">
+                                    Section:
+                                    <?= htmlspecialchars(is_array($item) ? ($item['section'] ?? 'Unknown') : $item) ?>
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    Row Letter:
+                                    <?= htmlspecialchars(is_array($item) ? ($item['rowLetter'] ?? 'Unknown') : $item) ?>
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    Seat Number:
+                                    <?= htmlspecialchars(is_array($item) ? ($item['seatNumber'] ?? 'Unknown') : $item) ?>
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    Price:
+                                    $<?= htmlspecialchars(is_array($item) ? ($item['price'] ?? '0.00') : '0.00') ?>
+                                </p>
                                 <form method="post" action="<?= $basePath ?>/cart/remove" class="inline">
                                     <input type="hidden" name="ticketId" value="<?= (int)$item['ticketId'] ?>">
                                     <button class="mt-2 inline-block bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700">
