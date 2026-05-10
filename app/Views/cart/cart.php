@@ -63,6 +63,7 @@ $cart = $cart ?? [];
                                     Section:
                                     <?= htmlspecialchars(is_array($item) ? ($item['section'] ?? 'Unknown') : $item) ?>
                                 </p>
+
                                 <p class="text-sm text-gray-600">
                                     Row Letter:
                                     <?= htmlspecialchars(is_array($item) ? ($item['rowLetter'] ?? 'Unknown') : $item) ?>
@@ -81,10 +82,19 @@ $cart = $cart ?? [];
                                         Remove
                                     </button>
                                 </form>
+                
+                                    <button class="mt-2 inline-block bg-slate-950 hover:bg-blue-600 text-white py-1 px-4 rounded-lg font-semibold transition-colors">
+                                       Buy Now
+                                    </button>
+                               
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
+
+                   <button class="mt-6 inline-block bg-slate-950 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold transition-colors">
+                     Buy All
+                    </button>
             </div>
 
         <?php endif; ?>
