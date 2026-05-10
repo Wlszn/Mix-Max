@@ -33,10 +33,21 @@ class CartController extends BaseController
 
     public function add(Request $request, Response $response): Response
     {
-        $ticketId = (int) (($request->getParsedBody()['ticketId'] ?? 0));
+        $ticketIds = $request->getParsedBody()['ticketIds'] ?? [];
 
-        if ($ticketId > 0) {
-            $this->cartService->addTicketById($ticketId, $this->ticketService);
+        if (is_array($ticketIds)) {
+            foreach ($ticketIds as $ticketId) {
+                $ticketId = (int) $ticketId;
+                if ($ticketId > 0) {
+                    $this->cartService->addTicketById($ticketId, $this->ticketService);
+                }
+            }
+        } else {
+            // Handle single ticketId for backward compatibility
+            $ticketId = (int) (($request->getParsedBody()['ticketId'] ?? 0));
+            if ($ticketId > 0) {
+                $this->cartService->addTicketById($ticketId, $this->ticketService);
+            }
         }
 
         return $this->redirect($request, $response, 'cart.index');

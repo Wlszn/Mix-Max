@@ -29,6 +29,7 @@ $startingPrice = !empty($tickets)
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($event['title'] ?? 'Event Details') ?> - Mix Max</title>
+
 </head>
 
 <body class="bg-white text-slate-950">
@@ -78,7 +79,7 @@ $startingPrice = !empty($tickets)
 
     
                  <div class="border border-blue-200 bg-blue-50 rounded-xl p-6 mt-auto">
-                <div class="flex items-center justify-between gap-6">
+                <div class="flex items-center justify-center gap-6">
                     <div>
                         <p class="text-gray-700 mb-1">Tickets from</p>
                         <p class="text-5xl font-bold text-blue-600">
@@ -87,29 +88,11 @@ $startingPrice = !empty($tickets)
                     </div>
 
                     <div>
-                        <p class="text-gray-700 mb-2">Quantity</p>
-                        <div class="flex items-center gap-2">
-                            <button type="button" id="decreaseQty" class="bg-gray-200 text-black px-4 py-3 rounded-lg font-semibold hover:bg-gray-800">
-                                −
-                            </button>
-                            <input id="quantity" type="number" value="1" min="1" class="w-16 text-center border border-slate-300 rounded px-2 py-3">
-                            <button type="button" id="increaseQty" class="bg-gray-200 text-black px-4 py-3 rounded-lg font-semibold hover:bg-gray-800">
-                                +
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
                        
                     </div>
                 </div>
 
             </div>
-
-            <a href="#seats"
-               class="block text-center bg-slate-950 hover:bg-blue-600 text-white py-3 rounded-xl font-semibold transition-colors">
-                Select Tickets
-            </a>
         </div>
     </section>
 
@@ -144,69 +127,77 @@ $startingPrice = !empty($tickets)
         </div>
 
         <!-- Seats -->
-        <div id="seats" class="lg:col-span-2">
+           <div id="seats" class="lg:col-span-2">
             <h2 class="text-2xl font-bold mb-4">Choose Your Seats</h2>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <div class="bg-slate-950 text-white text-center py-3 rounded-xl mb-6 font-semibold">
-                    STAGE
-                </div>
-
-                <?php if (empty($groupedSeats)): ?>
-                    <p class="text-slate-500">No tickets available for this event.</p>
-                <?php else: ?>
-                    <?php foreach ($groupedSeats as $sectionName => $rows): ?>
-                        <div class="mb-8">
-                            <h3 class="font-bold mb-4"><?= htmlspecialchars($sectionName) ?></h3>
-
-                            <?php foreach ($rows as $rowLetter => $rowTickets): ?>
-                                <div class="flex items-center gap-3 mb-3">
-                                    <span class="w-6 text-sm font-semibold text-slate-500">
-                                        <?= htmlspecialchars($rowLetter) ?>
-                                    </span>
-
-                                    <div class="flex flex-wrap gap-2">
-                                        <?php foreach ($rowTickets as $ticket): ?>
-                                            <?php
-                                                $isHeld = !empty($ticket['heldUntil']) && strtotime($ticket['heldUntil']) > time();
-                                            ?>
-
-                                            <?php if ($isHeld): ?>
-                                                <button
-                                                    disabled
-                                                    class="w-9 h-9 rounded-md bg-slate-400 text-white text-sm cursor-not-allowed">
-                                                    <?= htmlspecialchars($ticket['seatNumber']) ?>
-                                                </button>
-                                            <?php else: ?>
-                                                <form method="post" action="<?= $basePath ?>/cart/add" class="inline">
-                                                    <input type="hidden" name="ticketId" value="<?= (int)$ticket['ticketId'] ?>">
-                                                    <button
-                                                        type="checkbox"
-                                                        class="w-9 h-9 rounded-md bg-slate-100 hover:bg-blue-600 hover:text-white text-sm transition-colors">
-                                                        <?= htmlspecialchars($ticket['seatNumber']) ?>
-                                                    </button>
-                                                </form>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endforeach; ?>
-
-                    <div class="flex items-center gap-6 text-sm text-slate-500 pt-4 border-t border-slate-200">
-                        <span class="flex items-center gap-2">
-                            <span class="w-4 h-4 bg-slate-100 border rounded"></span> Available
-                        </span>
-                        <span class="flex items-center gap-2">
-                            <span class="w-4 h-4 bg-blue-600 rounded"></span> Selected
-                        </span>
-                        <span class="flex items-center gap-2">
-                            <span class="w-4 h-4 bg-slate-400 rounded"></span> Taken/Held
-                        </span>
+            <form method="post" action="<?= $basePath ?>/cart/add">
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                    <div class="bg-slate-950 text-white text-center py-3 rounded-xl mb-6 font-semibold">
+                        STAGE
                     </div>
-                <?php endif; ?>
-            </div>
+
+                    <?php if (empty($groupedSeats)): ?>
+                        <p class="text-slate-500">No tickets available for this event.</p>
+                    <?php else: ?>
+                        <?php foreach ($groupedSeats as $sectionName => $rows): ?>
+                            <div class="mb-8">
+                                <h3 class="font-bold mb-4"><?= htmlspecialchars($sectionName) ?></h3>
+
+                                <?php foreach ($rows as $rowLetter => $rowTickets): ?>
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <span class="w-6 text-sm font-semibold text-slate-500">
+                                            <?= htmlspecialchars($rowLetter) ?>
+                                        </span>
+
+                                        <div class="flex flex-wrap gap-2">
+                                            <?php foreach ($rowTickets as $ticket): ?>
+                                                <?php
+                                                    $isHeld = !empty($ticket['heldUntil']) && strtotime($ticket['heldUntil']) > time();
+                                                ?>
+
+                                                <?php if ($isHeld): ?>
+                                                    <div class="w-10 h-10 rounded-md bg-slate-400 text-white text-sm flex items-center justify-center cursor-not-allowed">
+                                                        <?= htmlspecialchars($ticket['seatNumber']) ?>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <label class="inline-flex items-center justify-center relative cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            name="ticketIds[]"
+                                                            value="<?= (int)$ticket['ticketId'] ?>"
+                                                            class="peer absolute opacity-0 w-10 h-10 cursor-pointer">
+                                                        <span class="seat-number inline-flex items-center justify-center w-10 h-10 rounded-md bg-slate-100 text-slate-700 text-sm font-semibold transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-hover:bg-blue-600 peer-hover:text-white">
+                                                            <?= htmlspecialchars($ticket['seatNumber']) ?>
+                                                        </span>
+                                                    </label>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endforeach; ?>
+
+                        <div class="flex items-center gap-6 text-sm text-slate-500 pt-4 border-t border-slate-200">
+                            <span class="flex items-center gap-2">
+                                <span class="w-5 h-5 bg-slate-100 border border-slate-300 rounded"></span> Available
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <span class="w-5 h-5 bg-blue-600 rounded"></span> Selected
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <span class="w-5 h-5 bg-slate-400 rounded"></span> Taken/Held
+                            </span>
+                        </div>
+
+                        <div class="mt-6 text-center">
+                            <button type="submit" class="bg-slate-950 hover:bg-blue-600 text-white py-3 px-6 rounded-xl font-semibold transition-colors">
+                                Add Selected Seats to Cart
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </form>
         </div>
     </section>
 
@@ -253,40 +244,6 @@ $startingPrice = !empty($tickets)
 
 </main>
 <?php require __DIR__ . '/../common/js-scripts.php'; ?>
-<script>
-(function() {
-    const quantityInput = document.getElementById('quantity');
-    const increaseBtn = document.getElementById('increaseQty');
-    const decreaseBtn = document.getElementById('decreaseQty');
-
-    if (!quantityInput || !increaseBtn || !decreaseBtn) {
-        return;
-    }
-
-    const normalizeQuantity = () => {
-        let value = parseInt(quantityInput.value, 10);
-        if (isNaN(value) || value < 1) {
-            value = 1;
-        }
-        quantityInput.value = value;
-    };
-
-    increaseBtn.addEventListener('click', function () {
-        normalizeQuantity();
-        quantityInput.value = parseInt(quantityInput.value, 10) + 1;
-    });
-
-    decreaseBtn.addEventListener('click', function () {
-        normalizeQuantity();
-        const value = parseInt(quantityInput.value, 10);
-        if (value > 1) {
-            quantityInput.value = value - 1;
-        }
-    });
-
-    quantityInput.addEventListener('input', normalizeQuantity);
-})();
-</script>
 <?php require __DIR__ . '/../common/footer.php'; ?>
 </body>
 </html>
