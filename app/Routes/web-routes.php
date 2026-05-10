@@ -12,31 +12,44 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 return static function (Slim\App $app): void {
 
     // ── Home ────────────────────────────────────────────────────────────────
-    $app->get('/',     [HomeController::class, 'index'])->setName('home.index');
+    $app->get('/', [HomeController::class, 'index'])->setName('home.index');
     $app->get('/home', [HomeController::class, 'index']);
 
     // ── Events ──────────────────────────────────────────────────────────────
-    $app->get('/events',      [EventController::class, 'index'])->setName('events.index');
+    $app->get('/events', [EventController::class, 'index'])->setName('events.index');
+
+    $app->get('/events/create', [EventController::class, 'create'])->setName('events.create');
+    $app->post('/events', [EventController::class, 'store'])->setName('events.store');
+
+    // —— Admin Events ────────────────────────────────────────────────
+    $app->get('/admin/events', [EventController::class, 'adminPending'])->setName('admin.events');
+
+    $app->post('/admin/events/{id}/approve', [EventController::class, 'approve'])
+        ->setName('admin.events.approve');
+
+    $app->post('/admin/events/{id}/reject', [EventController::class, 'reject'])
+        ->setName('admin.events.reject');
+
     $app->get('/events/{id}', [EventController::class, 'show'])->setName('events.show');
 
     // ── Cart ────────────────────────────────────────────────────────────────
     $app->get('/cart', [CartController::class, 'index'])->setName('cart.index');
     $app->post('/cart/add', [CartController::class, 'add'])
-    ->setName('cart.add');
+        ->setName('cart.add');
     $app->post('/cart/remove', [CartController::class, 'remove'])
-    ->setName('cart.remove');
+        ->setName('cart.remove');
 
     // ── Auth: Login ─────────────────────────────────────────────────────────
-    $app->get('/login',  [AuthController::class, 'showLogin'])->setName('auth.login');
+    $app->get('/login', [AuthController::class, 'showLogin'])->setName('auth.login');
     $app->post('/login', [AuthController::class, 'login'])->setName('auth.login.post');
 
     // ── Auth: OTP Verify ────────────────────────────────────────────────────
-    $app->get('/verify',       [AuthController::class, 'showVerify'])->setName('auth.verify');
-    $app->post('/verify',      [AuthController::class, 'verify'])->setName('auth.verify.post');
-    $app->get('/resend-otp',   [AuthController::class, 'resendOtp'])->setName('auth.resend');
+    $app->get('/verify', [AuthController::class, 'showVerify'])->setName('auth.verify');
+    $app->post('/verify', [AuthController::class, 'verify'])->setName('auth.verify.post');
+    $app->get('/resend-otp', [AuthController::class, 'resendOtp'])->setName('auth.resend');
 
     // ── Auth: Register ──────────────────────────────────────────────────────
-    $app->get('/register',  [AuthController::class, 'showRegister'])->setName('auth.register');
+    $app->get('/register', [AuthController::class, 'showRegister'])->setName('auth.register');
     $app->post('/register', [AuthController::class, 'register'])->setName('auth.register.post');
 
     // ── Auth: Logout ─────────────────────────────────────────────────────────
@@ -44,7 +57,8 @@ return static function (Slim\App $app): void {
 
     // ── Dev utilities ────────────────────────────────────────────────────────
     $app->get('/phpinfo', function (Request $request, Response $response) {
-        ob_start(); phpinfo();
+        ob_start();
+        phpinfo();
         $response->getBody()->write(ob_get_clean());
         return $response;
     });

@@ -87,7 +87,7 @@ class VenueModel extends BaseModel
                 $data['imageUrl'] ?? null
             ]
         );
-        
+
         return (int) $this->lastInsertId();
     }
 

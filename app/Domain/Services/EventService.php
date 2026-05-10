@@ -4,17 +4,19 @@ namespace App\Domain\Services;
 
 use App\Domain\Models\EventModel;
 use App\Domain\Models\TicketModel;
+use App\Domain\Models\VenueModel;
 use App\Helpers\Core\PDOService;
 
 class EventService extends BaseService
 {
     private EventModel $eventModel;
     private TicketModel $ticketModel;
-
+    private VenueModel $venueModel;
     public function __construct(PDOService $db_service)
     {
         $this->eventModel = new EventModel($db_service);
         $this->ticketModel = new TicketModel($db_service);
+        $this->venueModel = new VenueModel($db_service);
     }
 
     public function createEvent(array $data): int
@@ -22,9 +24,40 @@ class EventService extends BaseService
         return $this->eventModel->create($data);
     }
 
-    public function createUserEvent(array $data, int $userId): int
+    public function createUserEvent(array $data, array $files, int $userId): bool
     {
-        return $this->eventModel->createByUser($data, $userId);
+        $venueId = $this->venueModel->create([
+            'name' => $data['venueName'],
+            'address' => $data['address'],
+            'city' => $data['city'],
+            'capacity' => (int) $data['capacity'],
+            'imageUrl' => null
+        ]);
+
+        $imageUrl = $data['imageUrl'] ?? null;
+
+        $eventId = $this->eventModel->createAndReturnId([
+            'title' => $data['title'],
+            'artist' => $data['artist'],
+            'category' => $data['category'],
+            'description' => $data['description'],
+            'venueId' => $venueId,
+            'createdByUserId' => $userId,
+            'date' => $data['date'],
+            'startTime' => $data['startTime'],
+            'endTime' => $data['endTime'],
+            'imageUrl' => $imageUrl,
+            'status' => 'pending'
+        ]);
+
+        $this->ticketModel->generateTicketsForEvent(
+            $eventId,
+            $data['ticketSection'],
+            (float) $data['ticketPrice'],
+            (int) $data['ticketQuantity']
+        );
+
+        return true;
     }
 
     public function getAllEvents(): array
@@ -96,5 +129,15 @@ class EventService extends BaseService
     {
         return array_slice($this->getAllEvents(), 0, $limit);
     }
+
+    public function getPendingEvents(): array
+    {
+        return $this->eventModel->findPendingEvents();
+    }
+    public function updateEventStatus(int $eventId, string $status): bool
+    {
+        return $this->eventModel->updateStatus($eventId, $status);
+    }
+
 
 }

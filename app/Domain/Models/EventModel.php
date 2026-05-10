@@ -241,17 +241,61 @@ class EventModel extends BaseModel
         );
     }
 
-public function findSimilar(int $eventId, string $category, string $city): array
-{
-    return $this->selectAll(
-        'SELECT e.*, v.name AS venueName, v.city
+    public function findSimilar(int $eventId, string $category, string $city): array
+    {
+        return $this->selectAll(
+            'SELECT e.*, v.name AS venueName, v.city
          FROM event e
          JOIN venue v ON e.venueId = v.venueId
          WHERE e.eventId != ?
            AND (e.category = ? OR v.city = ?)
          ORDER BY e.date ASC
          LIMIT 4',
-        [$eventId, $category, $city]
-    );
-}
+            [$eventId, $category, $city]
+        );
+    }
+
+    public function createAndReturnId(array $data): int
+    {
+        $this->execute(
+            'INSERT INTO event
+        (title, artist, category, description, venueId, createdByUserId, date, startTime, endTime, imageUrl, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                $data['title'],
+                $data['artist'],
+                $data['category'],
+                $data['description'] ?? null,
+                $data['venueId'],
+                $data['createdByUserId'],
+                $data['date'],
+                $data['startTime'],
+                $data['endTime'],
+                $data['imageUrl'] ?? null,
+                $data['status'] ?? 'pending'
+            ]
+        );
+
+        return (int) $this->lastInsertId();
+    }
+
+    public function findPendingEvents(): array
+    {
+        return $this->selectAll(
+            'SELECT e.*, v.name AS venueName, v.city
+         FROM event e
+         JOIN venue v ON e.venueId = v.venueId
+         WHERE e.status = ?
+         ORDER BY e.created_at DESC',
+            ['pending']
+        );
+    }
+
+    public function updateStatus(int $eventId, string $status): bool
+    {
+        return $this->execute(
+            'UPDATE event SET status = ? WHERE eventId = ?',
+            [$status, $eventId]
+        );
+    }
 }

@@ -70,18 +70,32 @@ class EventController extends BaseController
 
     public function store(Request $request, Response $response): Response
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $userId = $_SESSION['user']['userId'] ?? null;
 
         if (!$userId) {
-            return $this->redirect($request, $response, 'home.index');
+            return $this->redirect($request, $response, 'auth.login');
         }
 
-        $this->eventService->createUserEvent(
-            (array) $request->getParsedBody(),
-            (int) $userId
-        );
+        try {
+            $this->eventService->createUserEvent(
+                (array) $request->getParsedBody(),
+                $_FILES,
+                (int) $userId
+            );
+        } catch (\Throwable $e) {
+            echo '<pre>';
+            echo $e->getMessage();
+            echo "\n\n";
+            echo $e->getTraceAsString();
+            echo '</pre>';
+            exit;
+        }
 
-        return $this->redirect($request, $response, 'events.index');
+        return $this->redirect($request, $response, 'admin.events');
     }
 
     public function searchJson(Request $request, Response $response): Response
@@ -107,5 +121,33 @@ class EventController extends BaseController
             'date' => $queryParams['date'] ?? '',
             'sort' => $queryParams['sort'] ?? 'ending_soon'
         ];
+    }
+
+    public function adminPending(Request $request, Response $response): Response
+    {
+        $events = $this->eventService->getPendingEvents();
+
+        return $this->render($response, 'admin/admin-review.php', [
+            'page_title' => 'Review Events',
+            'events' => $events
+        ]);
+    }
+
+    public function approve(Request $request, Response $response, array $args): Response
+    {
+        $eventId = (int) $args['id'];
+
+        $this->eventService->updateEventStatus($eventId, 'scheduled');
+
+        return $this->redirect($request, $response, 'admin.events');
+    }
+
+    public function reject(Request $request, Response $response, array $args): Response
+    {
+        $eventId = (int) $args['id'];
+
+        $this->eventService->updateEventStatus($eventId, 'rejected');
+
+        return $this->redirect($request, $response, 'admin.events');
     }
 }

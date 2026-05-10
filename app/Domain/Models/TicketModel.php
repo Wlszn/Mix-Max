@@ -128,7 +128,7 @@ class TicketModel extends BaseModel
                 $data['price']
             ]
         );
-        
+
         return (int) $this->lastInsertId();
     }
 
@@ -142,7 +142,7 @@ class TicketModel extends BaseModel
     {
         $ids = [];
         $this->beginTransaction();
-        
+
         try {
             foreach ($tickets as $ticketData) {
                 $this->execute(
@@ -162,7 +162,7 @@ class TicketModel extends BaseModel
             $this->rollback();
             throw $e;
         }
-        
+
         return $ids;
     }
 
@@ -267,5 +267,24 @@ class TicketModel extends BaseModel
              FROM ticket WHERE eventId = ?',
             [$eventId]
         );
+    }
+
+    public function generateTicketsForEvent(int $eventId, string $section, float $price, int $quantity): bool
+    {
+        $tickets = [];
+
+        for ($i = 1; $i <= $quantity; $i++) {
+            $tickets[] = [
+                'eventId' => $eventId,
+                'section' => $section,
+                'rowLetter' => 'A',
+                'seatNumber' => (string) $i,
+                'price' => $price
+            ];
+        }
+
+        $this->createMultiple($tickets);
+
+        return true;
     }
 }
