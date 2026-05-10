@@ -181,7 +181,7 @@ $startingPrice = !empty($tickets)
                                                 <form method="post" action="<?= $basePath ?>/cart/add" class="inline">
                                                     <input type="hidden" name="ticketId" value="<?= (int)$ticket['ticketId'] ?>">
                                                     <button
-                                                        type="submit"
+                                                        type="checkbox"
                                                         class="w-9 h-9 rounded-md bg-slate-100 hover:bg-blue-600 hover:text-white text-sm transition-colors">
                                                         <?= htmlspecialchars($ticket['seatNumber']) ?>
                                                     </button>
