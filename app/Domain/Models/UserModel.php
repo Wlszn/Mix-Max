@@ -22,7 +22,7 @@ class UserModel extends BaseModel
     }
 
     /**
-     * Create a new user. stores the phone number (E.164 format).
+     * Create a new user. Stores the phone number (E.164 format).
      */
     public function create(string $username, string $email, string $password, string $phone = ''): bool
     {
@@ -35,6 +35,34 @@ class UserModel extends BaseModel
         );
     }
 
+    /**
+     * Update username, email, and phone for a user.
+     */
+    public function updateProfile(int $id, string $username, string $email, string $phone): bool
+    {
+        return (bool) $this->execute(
+            'UPDATE users SET username = ?, email = ?, phone = ? WHERE userId = ?',
+            [$username, $email, $phone, $id]
+        );
+    }
+
+    /**
+     * Hash and store a new password.
+     */
+    public function updatePassword(int $id, string $newPassword): bool
+    {
+        $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        return (bool) $this->execute(
+            'UPDATE users SET password = ? WHERE userId = ?',
+            [$passwordHash, $id]
+        );
+    }
+
+    /**
+     * Legacy full update (username + email + password in one shot).
+     * Kept for backwards compatibility.
+     */
     public function update(int $id, string $username, string $email, string $password): bool
     {
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);

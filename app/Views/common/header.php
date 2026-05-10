@@ -100,14 +100,19 @@ unset($_SESSION['flash_success']);
                                     <?= htmlspecialchars($user['email']) ?>
                                 </p>
                             </div>
-
+ 
+                            <a href="<?= $basePath ?>/profile"
+                                class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                My Profile
+                            </a>
+ 
                             <?php if (($user['role'] ?? '') === 'admin'): ?>
                                 <a href="<?= $basePath ?>/admin/events"
                                     class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
                                     Admin Dashboard
                                 </a>
                             <?php endif; ?>
-
+ 
                             <a href="<?= $basePath ?>/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                 Sign Out
                             </a>
