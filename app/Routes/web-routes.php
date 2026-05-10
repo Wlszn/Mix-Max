@@ -6,6 +6,7 @@ use App\Controllers\AuthController;
 use App\Controllers\CartController;
 use App\Controllers\EventController;
 use App\Controllers\HomeController;
+use App\Controllers\UserController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -30,14 +31,17 @@ return static function (Slim\App $app): void {
     $app->post('/admin/events/{id}/reject', [EventController::class, 'reject'])
         ->setName('admin.events.reject');
 
+    $app->get('/events/search', [EventController::class, 'searchJson'])->setName('events.search');
     $app->get('/events/{id}', [EventController::class, 'show'])->setName('events.show');
 
     // ── Cart ────────────────────────────────────────────────────────────────
     $app->get('/cart', [CartController::class, 'index'])->setName('cart.index');
-    $app->post('/cart/add', [CartController::class, 'add'])
-        ->setName('cart.add');
-    $app->post('/cart/remove', [CartController::class, 'remove'])
-        ->setName('cart.remove');
+    $app->post('/cart/add', [CartController::class, 'add'])->setName('cart.add');
+    $app->post('/cart/remove', [CartController::class, 'remove'])->setName('cart.remove');
+
+    // ── Profile ─────────────────────────────────────────────────────────────
+    $app->get('/profile', [UserController::class, 'showProfile'])->setName('user.profile');
+    $app->post('/profile', [UserController::class, 'updateProfile'])->setName('user.profile.update');
 
     // ── Auth: Login ─────────────────────────────────────────────────────────
     $app->get('/login', [AuthController::class, 'showLogin'])->setName('auth.login');
