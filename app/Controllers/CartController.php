@@ -63,4 +63,18 @@ class CartController extends BaseController
 
         return $this->redirect($request, $response, 'cart.index');
     }
+
+    public function buy(Request $request, Response $response): Response
+    {
+
+
+      
+    }
+
+    public function buyAll(Request $request, Response $response): Response
+    {
+        
+    }
+
+
 }

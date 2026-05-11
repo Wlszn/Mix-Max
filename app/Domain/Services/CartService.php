@@ -76,4 +76,6 @@ class CartService extends BaseService
         $this->addToCart($ticket);
     }
 
+        public function 
+
 }
