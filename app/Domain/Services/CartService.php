@@ -32,7 +32,8 @@ class CartService extends BaseService
 
     public function getCart(): array
     {
-        return $_SESSION['cart'];
+       $cart = $_SESSION['cart'];
+    return is_array($cart) ? array_values($cart) : [];
     }
 
     public function removeFromCart(int $ticketId): void
@@ -75,5 +76,7 @@ class CartService extends BaseService
 
         $this->addToCart($ticket);
     }
+
+       
 
 }

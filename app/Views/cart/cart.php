@@ -4,6 +4,7 @@ $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
     : '';
 
 $cart = $cart ?? [];
+$totalPrice = array_sum(array_column($cart, 'price'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -46,8 +47,12 @@ $cart = $cart ?? [];
 
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-3xl font-bold text-gray-900 mb-6">Your Cart</h1>
-
-                <div class="space-y-4">
+                   <p>
+                <?php if (isset($totalPrice)): ?>
+                    Total: $<?= number_format($totalPrice, 2) ?>
+                <?php endif; ?>
+                </p>
+                <?php if (count($cart) === 1): ?>
                     <?php foreach ($cart as $item): ?>
                         <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
                             <div>
@@ -78,23 +83,80 @@ $cart = $cart ?? [];
                                 </p>
                                 <form method="post" action="<?= $basePath ?>/cart/remove" class="inline">
                                     <input type="hidden" name="ticketId" value="<?= (int)$item['ticketId'] ?>">
-                                    <button class="mt-2 inline-block bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700">
+                                    <button class="mt-2 inline-block bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 font-semibold transition-colors">
                                         Remove
                                     </button>
                                 </form>
                 
+                                <form method="post" action="<?= $basePath ?>/cart/buy" class="inline">
+                                    <input type="hidden" name="ticketId" value="<?= (int)$item['ticketId'] ?>">
                                     <button class="mt-2 inline-block bg-slate-950 hover:bg-blue-600 text-white py-1 px-4 rounded-lg font-semibold transition-colors">
                                        Buy Now
                                     </button>
+                                </form>
                                
                             </div>
                         </div>
                     <?php endforeach; ?>
-                </div>
+                <?php else: ?>
+                        <div class="space-y-4">
+                            <?php foreach ($cart as $item): ?>
+                                <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="ticketIds[]" value="<?= (int)$item['ticketId'] ?>" class="mr-4">
+                                        <div>
+                                            <h2 class="text-lg font-semibold text-gray-900">
+                                                Ticket
+                                            </h2>
 
-                   <button class="mt-6 inline-block bg-slate-950 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold transition-colors">
-                     Buy All
-                    </button>
+                                            <p class="text-sm text-gray-600">
+                                                Ticket ID:
+                                                <?= htmlspecialchars(is_array($item) ? ($item['ticketId'] ?? 'Unknown') : $item) ?>
+                                            </p>
+                                            <p class="text-sm text-gray-600">
+                                                Section:
+                                                <?= htmlspecialchars(is_array($item) ? ($item['section'] ?? 'Unknown') : $item) ?>
+                                            </p>
+
+                                            <p class="text-sm text-gray-600">
+                                                Row Letter:
+                                                <?= htmlspecialchars(is_array($item) ? ($item['rowLetter'] ?? 'Unknown') : $item) ?>
+                                            </p>
+                                            <p class="text-sm text-gray-600">
+                                                Seat Number:
+                                                <?= htmlspecialchars(is_array($item) ? ($item['seatNumber'] ?? 'Unknown') : $item) ?>
+                                            </p>
+                                            <p class="text-sm text-gray-600">
+                                                Price:
+                                                $<?= htmlspecialchars(is_array($item) ? ($item['price'] ?? '0.00') : '0.00') ?>
+                                            </p>
+                                           
+                                            <form method="post" action="<?= $basePath ?>/cart/remove" class="inline">
+                                                <input type="hidden" name="ticketId" value="<?= (int)$item['ticketId'] ?>">
+                                                <button class="mt-2 inline-block bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 font-semibold transition-colors">
+                                                    Remove
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="mt-6 flex flex-wrap items-center justify-center gap-4">
+                            <form method="post" action="<?= $basePath ?>/cart/buy-selected">
+                            <button type="submit" class="bg-slate-950 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold transition-colors">
+                                Buy Selected
+                            </button> 
+                            </form>
+                  
+                      <form method="post" action="<?= $basePath ?>/cart/clear" class="inline">
+                        <button class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 font-semibold transition-colors">
+                            Clear
+                        </button>
+                    </form>
+                </div>
+                <br>
+                <?php endif; ?> 
             </div>
 
         <?php endif; ?>

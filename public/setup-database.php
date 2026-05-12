@@ -84,6 +84,7 @@ CREATE TABLE `ticket` (
   `rowLetter` varchar(3) NOT NULL,
   `seatNumber` varchar(10) NOT NULL,
   `price` decimal(10,2) NOT NULL,
+  `quantity` int NOT NULL DEFAULT 1,
   `heldUntil` datetime DEFAULT NULL,
   `created_at` timestamp DEFAULT current_timestamp(),
   `updated_at` timestamp DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -125,9 +126,9 @@ INSERT INTO `venue` (`name`, `address`, `city`, `capacity`, `imageUrl`) VALUES
 ('Scotiabank Arena', '40 Bay St', 'Toronto', 19800, 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f'),
 ('MetLife Stadium', '1 MetLife Stadium Dr', 'East Rutherford', 82500, 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14');
 
-INSERT INTO `users` (`username`, `email`, `password`, `twoFactor`, `phone`, `role`) VALUES
-('admin', 'admin@mixmax.com', '\$2y\$10\$wH4O9QmJ0m0aBvFvHqF1VesX2Y9G4JQj8Q8P2I2rYk3l9F3QzQF6K', '', '123-456-7890', 'admin'),
-('demo_user', 'user@mixmax.com', '\$2y\$10\$wH4O9QmJ0m0aBvFvHqF1VesX2Y9G4JQj8Q8P2I2rYk3l9F3QzQF6K', '', '098-765-4321', 'user');
+INSERT INTO `users` (`username`, `email`, `password`, `twoFactor`, `role`) VALUES
+('admin', 'admin@mixmax.com', '\$2y\$10\$wH4O9QmJ0m0aBvFvHqF1VesX2Y9G4JQj8Q8P2I2rYk3l9F3QzQF6K', '', 'admin'),
+('demo_user', 'user@mixmax.com', '\$2y\$10\$wH4O9QmJ0m0aBvFvHqF1VesX2Y9G4JQj8Q8P2I2rYk3l9F3QzQF6K', '', 'user');
 
 INSERT INTO `event` (`title`, `artist`, `category`, `description`, `venueId`, `createdByUserId`, `date`, `startTime`, `endTime`, `imageUrl`, `status`) VALUES
 ('The Midnight Tour 2026', 'Arctic Wolves', 'concert', 'A high-energy concert experience featuring the band''s newest album and greatest hits.', 1, NULL, '2026-05-14', '20:00:00', '23:00:00', 'https://images.unsplash.com/photo-1503095396549-807759245b35', 'scheduled'),
@@ -136,31 +137,42 @@ INSERT INTO `event` (`title`, `artist`, `category`, `description`, `venueId`, `c
 ('Laugh Out Loud Night', 'Mike Rivers', 'comedy', 'A stand-up comedy night with one of the city''s funniest performers.', 2, NULL, '2026-05-21', '19:00:00', '21:00:00', 'https://images.unsplash.com/photo-1527224857830-43a7acc85260', 'scheduled'),
 ('Broadway Classics', 'Vanier Theater Company', 'theater', 'A live theater performance inspired by Broadway classics and modern stage productions.', 2, NULL, '2026-06-02', '18:30:00', '21:00:00', 'https://images.unsplash.com/photo-1507924538820-ede94a04019d', 'scheduled');
 
-INSERT INTO `ticket` (`eventId`, `section`, `rowLetter`, `seatNumber`, `price`) VALUES
-(1, 'Orchestra', 'A', '1', 99.99),
-(1, 'Orchestra', 'A', '2', 99.99),
-(1, 'Orchestra', 'A', '3', 99.99),
-(1, 'Orchestra', 'B', '10', 79.99),
-(1, 'Orchestra', 'B', '11', 79.99),
+INSERT INTO `ticket` (`eventId`, `section`, `rowLetter`, `seatNumber`, `price`, `quantity`) VALUES
+(1, 'Orchestra', 'A', '1', 99.99, 1),
+(1, 'Orchestra', 'A', '2', 99.99, 1),
+(1, 'Orchestra', 'A', '3', 99.99, 1),
+(1, 'Orchestra', 'B', '10', 79.99, 1),
+(1, 'Orchestra', 'B', '11', 79.99, 1),
+(1, 'Mezzanine', 'C', '20', 59.99, 1),
+(1, 'Mezzanine', 'C', '21', 59.99, 1),
 
-(2, 'Floor', 'A', '1', 120.00),
-(2, 'Floor', 'A', '2', 120.00),
-(2, 'General', 'C', '15', 89.00),
-(2, 'General', 'C', '16', 89.00),
-(2, 'General', 'D', '20', 89.00),
+(2, 'Floor', 'A', '1', 120.00, 1),
+(2, 'Floor', 'A', '2', 120.00, 1),
+(2, 'General', 'C', '15', 89.00, 1),
+(2, 'General', 'C', '16', 89.00, 1),
+(2, 'General', 'D', '20', 89.00, 1),
+(2, 'General', 'D', '21', 89.00, 1),
 
-(3, 'Lower', 'A', '5', 75.00),
-(3, 'Lower', 'A', '6', 75.00),
-(3, 'Upper', 'F', '30', 55.00),
-(3, 'Upper', 'F', '31', 55.00),
+(3, 'Lower', 'A', '5', 75.00, 1),
+(3, 'Lower', 'A', '6', 75.00, 1),
+(3, 'Upper', 'F', '30', 55.00, 1),
+(3, 'Upper', 'F', '31', 55.00, 1),
+(3, 'Upper', 'G', '40', 45.00, 1),
+(3, 'Upper', 'G', '41', 45.00, 1),
 
-(4, 'Main', 'B', '8', 49.99),
-(4, 'Main', 'B', '9', 49.99),
-(4, 'Main', 'C', '12', 39.99),
+(4, 'Main', 'B', '8', 49.99, 1),
+(4, 'Main', 'B', '9', 49.99, 1),
+(4, 'Main', 'C', '12', 39.99, 1),
+(4, 'Main', 'C', '13', 39.99, 1),
+(4, 'Balcony', 'D', '25', 29.99, 1),
+(4, 'Balcony', 'D', '26', 29.99, 1),
 
-(5, 'Front', 'A', '1', 65.00),
-(5, 'Front', 'A', '2', 65.00),
-(5, 'Rear', 'D', '14', 45.00);
+(5, 'Front', 'A', '1', 65.00, 1),
+(5, 'Front', 'A', '2', 65.00, 1),
+(5, 'Rear', 'D', '14', 45.00, 1),
+(5, 'Rear', 'D', '15', 45.00, 1),
+(5, 'Rear', 'E', '20', 35.00, 1),
+(5, 'Rear', 'E', '21', 35.00, 1);
 SQL;
 
   $pdo->exec($sql);

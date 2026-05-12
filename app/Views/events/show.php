@@ -243,7 +243,7 @@ $startingPrice = !empty($tickets)
     </section>
 
 </main>
-<?php require __DIR__ . '/../common/js-scripts.php'; ?>
-<?php require __DIR__ . '/../common/footer.php'; ?>
 </body>
 </html>
+<?php require __DIR__ . '/../common/js-scripts.php'; ?>
+<?php require __DIR__ . '/../common/footer.php'; ?>
