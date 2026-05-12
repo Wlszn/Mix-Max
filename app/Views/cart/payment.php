@@ -2,6 +2,10 @@
 $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
     ? '/' . APP_ROOT_DIR_NAME
     : '';
+
+$cart = $_SESSION['payment_tickets'];
+
+$totalPrice = array_sum(array_column($cart, 'price'));
 ?>
 
 <!DOCTYPE html>
