@@ -61,13 +61,13 @@ return static function (Slim\App $app): void {
     $app->post('/cart/add', [CartController::class, 'add'])->setName('cart.add');
     $app->post('/cart/remove', [CartController::class, 'remove'])->setName('cart.remove');
     $app->post('/cart/clear', [CartController::class, 'clear'])->setName('cart.clear');
-    $app->post('/cart/payment', [CartController::class, 'payment'])->setName('cart.payment');
+    $app->get('/cart/payment', [CartController::class, 'payment'])->setName('cart.payment');
     $app->post('/cart/buy', [CartController::class, 'buy'])->setName('cart.buy');
     $app->post('/cart/buy-selected', [CartController::class, 'buySelected'])->setName('cart.buy-selected');
     
     // ── Stripe Payment Routes ────────────────────────────────────────────────
-    $app->post('/process-payment', [CartController::class, 'processPayment'])->setName('cart.processPayment');
-    $app->get('/payment/result', [CartController::class, 'paymentResult'])->setName('cart.paymentResult');
+    $app->get('/payment/result', [CartController::class, 'paymentResult'])->setName('payment.result');
+    $app->post('/cart/process-payment', [CartController::class, 'processPayment'])->setName('cart.process-payment');
 
     // ── Profile ─────────────────────────────────────────────────────────────
     $app->get('/profile', [UserController::class, 'showProfile'])->setName('user.profile');
@@ -100,4 +100,20 @@ return static function (Slim\App $app): void {
     $app->get('/error', function (Request $request, Response $response) {
         throw new \Slim\Exception\HttpBadRequestException($request, 'Runtime error test.');
     });
+
+    // Add to your routes file temporarily
+$app->get('/debug-cart-routes', function ($request, $response, $args) use ($app) {
+    $routes = $app->getRouteCollector()->getRoutes();
+    $output = "<h1>Cart Routes</h1><ul>";
+    foreach ($routes as $route) {
+        $pattern = $route->getPattern();
+        if (strpos($pattern, '/cart') !== false || strpos($pattern, '/payment') !== false) {
+            $methods = implode(',', $route->getMethods());
+            $output .= "<li><strong>$methods</strong> - $pattern</li>";
+        }
+    }
+    $output .= "</ul>";
+    $response->getBody()->write($output);
+    return $response;
+});
 };

@@ -172,75 +172,75 @@ class CartController extends BaseController
     ]);
 }
 
-    public function processPayment(Request $request, Response $response): Response
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        
-        $userId = $_SESSION['user']['userId'] ?? null;
-        if (!$userId) {
-            return $this->redirect($request, $response, 'auth.login');
-        }
-        
-        $tickets = $_SESSION['payment_tickets'] ?? [];
-        if (empty($tickets)) {
-            return $this->redirect($request, $response, 'cart.index');
-        }
-        
-        $totalPrice = array_sum(array_column($tickets, 'price'));
-        $paymentMethodId = $request->getParsedBody()['paymentMethodId'] ?? null;
-        
-        if (!$paymentMethodId) {
-            $_SESSION['payment_error'] = 'Invalid payment method';
-            return $this->redirect($request, $response, 'cart.payment');
-        }
-        
-        // Get Stripe secret key
-        $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
-        Stripe::setApiKey($stripeConfig['secret_key']);
-        
-        try {
-            // Create a PaymentIntent
-            $paymentIntent = \Stripe\PaymentIntent::create([
-                'amount' => (int)($totalPrice * 100),
-                'currency' => 'usd',
-                'payment_method' => $paymentMethodId,
-                'confirmation_method' => 'manual',
-                'confirm' => true,
-                'metadata' => [
-                    'user_id' => $userId,
-                    'ticket_ids' => implode(',', array_column($tickets, 'ticketId'))
-                ]
-            ]);
-            
-            if ($paymentIntent->status === 'succeeded') {
-                // Create booking
-                $bookingId = $this->bookingService->createBooking($userId, $tickets);
-                
-                if ($bookingId) {
-                    unset($_SESSION['payment_tickets']);
-                    $this->cartService->clearCart();
-                    
-                    // Redirect to result page with success status
-                    return $response
-                        ->withHeader('Location', '/payment/result?status=success&booking_id=' . $bookingId)
-                        ->withStatus(302);
-                }
-            }
-            
-            // Payment failed
-            return $response
-                ->withHeader('Location', '/payment/result?status=failed')
-                ->withStatus(302);
-            
-        } catch (\Exception $e) {
-            error_log("Payment error: " . $e->getMessage());
-            return $response
-                ->withHeader('Location', '/payment/result?status=error&message=' . urlencode($e->getMessage()))
-                ->withStatus(302);
-        }
+ public function processPayment(Request $request, Response $response): Response
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
+    
+    $userId = $_SESSION['user']['userId'] ?? null;
+    if (!$userId) {
+        return $this->redirect($request, $response, 'auth.login');
+    }
+    
+    $tickets = $_SESSION['payment_tickets'] ?? [];
+    if (empty($tickets)) {
+        return $this->redirect($request, $response, 'cart.index');
+    }
+    
+    $totalPrice = array_sum(array_column($tickets, 'price'));
+    $paymentMethodId = $request->getParsedBody()['paymentMethodId'] ?? null;
+    
+    if (!$paymentMethodId) {
+        $_SESSION['flash_error'] = 'Invalid payment method';
+        return $this->redirect($request, $response, 'cart.payment');
+    }
+    
+    // Get Stripe secret key
+    $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
+    \Stripe\Stripe::setApiKey($stripeConfig['secret_key']);
+    
+    try {
+        // Create a PaymentIntent
+        $paymentIntent = \Stripe\PaymentIntent::create([
+            'amount' => (int)($totalPrice * 100),
+            'currency' => 'usd',
+            'payment_method' => $paymentMethodId,
+            'confirmation_method' => 'manual',
+            'confirm' => true,
+            'metadata' => [
+                'user_id' => $userId,
+                'ticket_ids' => implode(',', array_column($tickets, 'ticketId'))
+            ]
+        ]);
+        
+        if ($paymentIntent->status === 'succeeded') {
+            // Create booking
+            $bookingId = $this->bookingService->createBooking($userId, $tickets);
+            
+            if ($bookingId) {
+                // Set success flash message
+                $_SESSION['flash_success'] = '✅ Payment successful! Your booking has been confirmed. Booking ID: #' . $bookingId;
+                
+                // Clear the session data
+                unset($_SESSION['payment_tickets']);
+                $this->cartService->clearCart();
+                
+                // Redirect to home page with success message
+                return $this->redirect($request, $response, 'home.index');
+            }
+        }
+        
+        // Payment failed
+        $_SESSION['flash_error'] = 'Payment failed. Please try again.';
+        return $this->redirect($request, $response, 'cart.payment');
+        
+    } catch (\Exception $e) {
+        error_log("Payment error: " . $e->getMessage());
+        $_SESSION['flash_error'] = 'Payment error: ' . $e->getMessage();
+        return $this->redirect($request, $response, 'cart.payment');
+    }
+}
 
     public function paymentResult(Request $request, Response $response): Response
     {
