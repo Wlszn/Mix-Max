@@ -24,6 +24,8 @@ return static function (Slim\App $app): void {
 
     // —— Admin Events ────────────────────────────────────────────────
     $app->get('/admin/events', [EventController::class, 'adminPending'])->setName('admin.events');
+    $app->get('/admin', [EventController::class, 'adminDashboard'])
+    ->setName('admin.dashboard');
 
     $app->post('/admin/events/{id}/approve', [EventController::class, 'approve'])
         ->setName('admin.events.approve');

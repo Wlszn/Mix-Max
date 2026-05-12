@@ -298,4 +298,47 @@ class EventModel extends BaseModel
             [$status, $eventId]
         );
     }
+
+    public function getDashboardStats(): array
+    {
+        return $this->selectOne(
+            'SELECT
+            (SELECT COUNT(*) FROM event) AS totalEvents,
+            (SELECT COUNT(*) FROM event WHERE status = "pending") AS pendingEvents,
+            (SELECT COUNT(*) FROM event WHERE status = "scheduled") AS activeEvents,
+            (SELECT COUNT(*) FROM event WHERE status = "completed") AS completedEvents,
+            (SELECT COUNT(*) FROM users) AS totalUsers,
+            (SELECT COUNT(*) FROM booking_ticket) AS ticketsSold,
+            (SELECT COALESCE(SUM(pricePaid), 0) FROM booking_ticket) AS totalRevenue'
+        );
+    }
+
+    public function getRecentEventsForDashboard(): array
+    {
+        return $this->selectAll(
+            'SELECT
+            e.eventId,
+            e.title,
+            e.date,
+            e.status,
+            COUNT(t.ticketId) AS tickets
+         FROM event e
+         LEFT JOIN ticket t ON e.eventId = t.eventId
+         GROUP BY e.eventId
+         ORDER BY e.created_at DESC
+         LIMIT 5'
+        );
+    }
+
+    public function getCategoryStats(): array
+    {
+        return $this->selectAll(
+            'SELECT
+            category,
+            COUNT(*) AS total
+         FROM event
+         GROUP BY category
+         ORDER BY total DESC'
+        );
+    }
 }

@@ -150,4 +150,14 @@ class EventController extends BaseController
 
         return $this->redirect($request, $response, 'admin.events');
     }
+
+    public function adminDashboard(Request $request, Response $response): Response
+    {
+        $dashboardData = $this->eventService->getAdminDashboardData();
+
+        return $this->render($response, 'admin/dashboard.php', [
+            'page_title' => 'Admin Dashboard',
+            ...$dashboardData
+        ]);
+    }
 }

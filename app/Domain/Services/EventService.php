@@ -172,5 +172,14 @@ class EventService extends BaseService
         return $this->eventModel->updateStatus($eventId, $status);
     }
 
+    public function getAdminDashboardData(): array
+    {
+        return [
+            'stats' => $this->eventModel->getDashboardStats(),
+            'recentEvents' => $this->eventModel->getRecentEventsForDashboard(),
+            'categoryData' => $this->eventModel->getCategoryStats(),
+        ];
+    }
+
 
 }
