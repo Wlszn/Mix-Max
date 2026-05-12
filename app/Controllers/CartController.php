@@ -7,10 +7,12 @@ namespace App\Controllers;
 use App\Domain\Services\BookingService;
 use App\Domain\Services\CartService;
 use App\Domain\Services\TicketService;
-use App\Helpers\Core\PDOService;  // ADD THIS LINE
+use App\Helpers\Core\PDOService;
+use App\Helpers\Core\AppSettings;
 use DI\Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Stripe\Stripe;
 
 class CartController extends BaseController
 {
@@ -24,7 +26,7 @@ class CartController extends BaseController
 
         $this->cartService = new CartService();
         $this->ticketService = $container->get(TicketService::class);
-        $this->bookingService = new BookingService($container->get(PDOService::class));  // Now this works
+        $this->bookingService = new BookingService($container->get(PDOService::class));
     }
 
     public function index(Request $request, Response $response): Response
@@ -76,93 +78,182 @@ class CartController extends BaseController
     }
 
     public function buy(Request $request, Response $response): Response
-{
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    $userId = $_SESSION['user']['userId'] ?? null;
-    if (!$userId) {
-        return $this->redirect($request, $response, 'auth.login');
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $userId = $_SESSION['user']['userId'] ?? null;
+        if (!$userId) {
+            return $this->redirect($request, $response, 'auth.login');
+        }
+
+        $ticketId = (int) (($request->getParsedBody()['ticketId'] ?? 0));
+        if ($ticketId <= 0) {
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        $cart = $this->cartService->getCart();
+        $selectedCart = array_filter($cart, fn($item) => $item['ticketId'] == $ticketId);
+        if (empty($selectedCart)) {
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        // Store selected tickets in session for payment page
+        $_SESSION['payment_tickets'] = array_values($selectedCart);
+        
+        // Redirect to payment page
+        return $this->redirect($request, $response, 'cart.payment');
     }
 
-    $ticketId = (int) (($request->getParsedBody()['ticketId'] ?? 0));
-    if ($ticketId <= 0) {
-        return $this->redirect($request, $response, 'cart.index');
+    public function buySelected(Request $request, Response $response): Response
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        $userId = $_SESSION['user']['userId'] ?? null;
+        if (!$userId) {
+            return $this->redirect($request, $response, 'auth.login');
+        }
+
+        $ticketIds = $request->getParsedBody()['ticketIds'] ?? [];
+        
+        // If only one ticketId is sent as string, convert to array
+        if (!is_array($ticketIds) && !empty($ticketIds)) {
+            $ticketIds = [$ticketIds];
+        }
+        
+        if (empty($ticketIds)) {
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        $cart = $this->cartService->getCart();
+        $selectedCart = [];
+        
+        foreach ($cart as $item) {
+            if (in_array($item['ticketId'], $ticketIds)) {
+                $selectedCart[] = $item;
+            }
+        }
+        
+        if (empty($selectedCart)) {
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        $_SESSION['payment_tickets'] = $selectedCart;
+        
+        return $this->redirect($request, $response, 'cart.payment');
     }
 
-    $cart = $this->cartService->getCart();
-    $selectedCart = array_filter($cart, fn($item) => $item['ticketId'] == $ticketId);
-    if (empty($selectedCart)) {
-        return $this->redirect($request, $response, 'cart.index');
+    public function payment(Request $request, Response $response): Response
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Get tickets from session
+        $tickets = $_SESSION['payment_tickets'] ?? [];
+        
+        if (empty($tickets)) {
+            // No tickets selected, redirect to cart
+            return $this->redirect($request, $response, 'cart.index');
+        }
+        
+        $totalPrice = array_sum(array_column($tickets, 'price'));
+        
+        // Get Stripe public key from config
+        $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
+        $stripePublicKey = $stripeConfig['public_key'] ?? '';
+        
+        return $this->render($response, 'cart/payment.php', [
+            'page_title' => 'Payment',
+            'tickets' => $tickets,
+            'totalPrice' => $totalPrice,
+            'stripePublicKey' => $stripePublicKey
+        ]);
     }
 
-    // Store selected tickets in session for payment page
-    $_SESSION['payment_tickets'] = array_values($selectedCart);
-    
-    // Redirect to payment page
-    return $this->redirect($request, $response, 'cart.payment');
-}
-
-public function buySelected(Request $request, Response $response): Response
-{
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    
-    $userId = $_SESSION['user']['userId'] ?? null;
-    if (!$userId) {
-        return $this->redirect($request, $response, 'auth.login');
-    }
-
-    $ticketIds = $request->getParsedBody()['ticketIds'] ?? [];
-    
-    // If only one ticketId is sent as string, convert to array
-    if (!is_array($ticketIds) && !empty($ticketIds)) {
-        $ticketIds = [$ticketIds];
-    }
-    
-    if (empty($ticketIds)) {
-        return $this->redirect($request, $response, 'cart.index');
-    }
-
-    $cart = $this->cartService->getCart();
-    $selectedCart = [];
-    
-    foreach ($cart as $item) {
-        if (in_array($item['ticketId'], $ticketIds)) {
-            $selectedCart[] = $item;
+    public function processPayment(Request $request, Response $response): Response
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        $userId = $_SESSION['user']['userId'] ?? null;
+        if (!$userId) {
+            return $this->redirect($request, $response, 'auth.login');
+        }
+        
+        $tickets = $_SESSION['payment_tickets'] ?? [];
+        if (empty($tickets)) {
+            return $this->redirect($request, $response, 'cart.index');
+        }
+        
+        $totalPrice = array_sum(array_column($tickets, 'price'));
+        $paymentMethodId = $request->getParsedBody()['paymentMethodId'] ?? null;
+        
+        if (!$paymentMethodId) {
+            $_SESSION['payment_error'] = 'Invalid payment method';
+            return $this->redirect($request, $response, 'cart.payment');
+        }
+        
+        // Get Stripe secret key
+        $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
+        Stripe::setApiKey($stripeConfig['secret_key']);
+        
+        try {
+            // Create a PaymentIntent
+            $paymentIntent = \Stripe\PaymentIntent::create([
+                'amount' => (int)($totalPrice * 100),
+                'currency' => 'usd',
+                'payment_method' => $paymentMethodId,
+                'confirmation_method' => 'manual',
+                'confirm' => true,
+                'metadata' => [
+                    'user_id' => $userId,
+                    'ticket_ids' => implode(',', array_column($tickets, 'ticketId'))
+                ]
+            ]);
+            
+            if ($paymentIntent->status === 'succeeded') {
+                // Create booking
+                $bookingId = $this->bookingService->createBooking($userId, $tickets);
+                
+                if ($bookingId) {
+                    unset($_SESSION['payment_tickets']);
+                    $this->cartService->clearCart();
+                    
+                    // Redirect to result page with success status
+                    return $response
+                        ->withHeader('Location', '/payment/result?status=success&booking_id=' . $bookingId)
+                        ->withStatus(302);
+                }
+            }
+            
+            // Payment failed
+            return $response
+                ->withHeader('Location', '/payment/result?status=failed')
+                ->withStatus(302);
+            
+        } catch (\Exception $e) {
+            error_log("Payment error: " . $e->getMessage());
+            return $response
+                ->withHeader('Location', '/payment/result?status=error&message=' . urlencode($e->getMessage()))
+                ->withStatus(302);
         }
     }
-    
-    if (empty($selectedCart)) {
-        return $this->redirect($request, $response, 'cart.index');
-    }
 
-    $_SESSION['payment_tickets'] = $selectedCart;
-    
-    return $this->redirect($request, $response, 'cart.payment');
-}
-
-public function payment(Request $request, Response $response): Response
-{
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+    public function paymentResult(Request $request, Response $response): Response
+    {
+        $status = $request->getQueryParams()['status'] ?? 'unknown';
+        $bookingId = $request->getQueryParams()['booking_id'] ?? null;
+        $errorMessage = $request->getQueryParams()['message'] ?? null;
+        
+        return $this->render($response, 'cart/result.php', [
+            'page_title' => 'Payment Result',
+            'status' => $status,
+            'bookingId' => $bookingId,
+            'errorMessage' => $errorMessage
+        ]);
     }
-    
-    // Get tickets from session
-    $tickets = $_SESSION['payment_tickets'] ?? [];
-    
-    if (empty($tickets)) {
-        // No tickets selected, redirect to cart
-        return $this->redirect($request, $response, 'cart.index');
-    }
-    
-    $totalPrice = array_sum(array_column($tickets, 'price'));
-    
-    return $this->render($response, 'cart/payment.php', [
-        'page_title' => 'Payment',
-        'tickets' => $tickets,
-        'totalPrice' => $totalPrice
-    ]);
-}
 }

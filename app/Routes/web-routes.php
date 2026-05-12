@@ -64,6 +64,10 @@ return static function (Slim\App $app): void {
     $app->get('/cart/payment', [CartController::class, 'payment'])->setName('cart.payment');
     $app->post('/cart/buy', [CartController::class, 'buy'])->setName('cart.buy');
     $app->post('/cart/buy-selected', [CartController::class, 'buySelected'])->setName('cart.buy-selected');
+    
+    // ── Stripe Payment Routes ────────────────────────────────────────────────
+    $app->post('/process-payment', [CartController::class, 'processPayment'])->setName('cart.processPayment');
+    $app->get('/payment/result', [CartController::class, 'paymentResult'])->setName('cart.paymentResult');
 
     // ── Profile ─────────────────────────────────────────────────────────────
     $app->get('/profile', [UserController::class, 'showProfile'])->setName('user.profile');

@@ -22,6 +22,7 @@ use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Factory\UriFactory;
 use Slim\Views\PhpRenderer;
+use Stripe\Stripe;
 
 $definitions = [
 
@@ -54,8 +55,6 @@ $definitions = [
         return new UserService($container->get(PDOService::class));
     },
 
-    // ── Twilio Verify ──────────────────────────────────────────────────────
-    // Reads credentials from $settings['twilio'] set in config/env.php
     TwilioVerifyService::class => function (ContainerInterface $container): TwilioVerifyService {
         $twilio = $container->get(AppSettings::class)->get('twilio');
         return new TwilioVerifyService(
