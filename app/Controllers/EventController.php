@@ -95,7 +95,9 @@ class EventController extends BaseController
             exit;
         }
 
-        return $this->redirect($request, $response, 'admin.events');
+        $_SESSION['flash_success'] = 'Your event was submitted for review. It will appear once an admin approves it.';
+
+        return $this->redirect($request, $response, 'home.index');
     }
 
     public function searchJson(Request $request, Response $response): Response
@@ -125,10 +127,10 @@ class EventController extends BaseController
 
     public function adminPending(Request $request, Response $response): Response
     {
-        $events = $this->eventService->getPendingEvents();
+        $events = $this->eventService->getAllEventsForAdmin();
 
-        return $this->render($response, 'admin/admin-review.php', [
-            'page_title' => 'Review Events',
+        return $this->render($response, 'admin/events-manage.php', [
+            'page_title' => 'Manage Events',
             'events' => $events
         ]);
     }
@@ -159,5 +161,22 @@ class EventController extends BaseController
             'page_title' => 'Admin Dashboard',
             ...$dashboardData
         ]);
+    }
+
+    public function adminManageEvents(Request $request, Response $response): Response
+    {
+        $events = $this->eventService->getAllEventsForAdmin();
+
+        return $this->render($response, 'admin/events-manage.php', [
+            'page_title' => 'Manage Events',
+            'events' => $events
+        ]);
+    }
+
+    public function adminDeleteEvent(Request $request, Response $response, array $args): Response
+    {
+        $this->eventService->deleteEvent((int) $args['id']);
+
+        return $this->redirect($request, $response, 'admin.events.manage');
     }
 }

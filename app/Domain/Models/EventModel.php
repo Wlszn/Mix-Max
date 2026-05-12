@@ -18,6 +18,7 @@ class EventModel extends BaseModel
              JOIN venue v ON e.venueId = v.venueId
              LEFT JOIN ticket t ON e.eventId = t.eventId
              WHERE e.eventId = ?
+             AND e.status = "scheduled"
              GROUP BY e.eventId',
             [$id]
         );
@@ -34,6 +35,7 @@ class EventModel extends BaseModel
              FROM event e
              JOIN venue v ON e.venueId = v.venueId
              LEFT JOIN ticket t ON e.eventId = t.eventId
+             WHERE e.status = "scheduled"
              GROUP BY e.eventId
              ORDER BY e.date ASC, e.startTime ASC'
         );
@@ -50,14 +52,23 @@ class EventModel extends BaseModel
              FROM event e
              JOIN venue v ON e.venueId = v.venueId
              LEFT JOIN ticket t ON e.eventId = t.eventId
-             WHERE e.title LIKE ? 
+             WHERE e.status = "scheduled"
+             AND (
+                e.title LIKE ? 
                 OR e.artist LIKE ? 
                 OR e.description LIKE ? 
                 OR v.name LIKE ? 
                 OR v.city LIKE ?
+             )
              GROUP BY e.eventId
              ORDER BY e.date ASC, e.startTime ASC',
-            ["%{$keyword}%", "%{$keyword}%", "%{$keyword}%", "%{$keyword}%", "%{$keyword}%"]
+            [
+                "%{$keyword}%",
+                "%{$keyword}%",
+                "%{$keyword}%",
+                "%{$keyword}%",
+                "%{$keyword}%"
+            ]
         );
     }
 
@@ -74,6 +85,9 @@ class EventModel extends BaseModel
 
         $where = [];
         $params = [];
+
+        $where[] = 'e.status = ?';
+        $params[] = 'scheduled';
 
         if ($search !== '') {
             $where[] = '(e.title LIKE ? 
@@ -220,17 +234,27 @@ class EventModel extends BaseModel
     public function liveSearch(string $keyword): array
     {
         return $this->selectAll(
-            'SELECT e.eventId, e.title, e.artist, e.date, e.startTime, e.imageUrl,
-                v.name AS venueName, v.city
-         FROM event e
-         JOIN venue v ON e.venueId = v.venueId
-         WHERE e.title LIKE ?
-            OR e.artist LIKE ?
-            OR e.description LIKE ?
-            OR v.name LIKE ?
-            OR v.city LIKE ?
-         ORDER BY e.date ASC, e.startTime ASC
-         LIMIT 5',
+            'SELECT 
+                e.eventId,
+                e.title,
+                e.artist,
+                e.date,
+                e.startTime,
+                e.imageUrl,
+                v.name AS venueName,
+                v.city
+             FROM event e
+             JOIN venue v ON e.venueId = v.venueId
+             WHERE e.status = "scheduled"
+             AND (
+                e.title LIKE ?
+                OR e.artist LIKE ?
+                OR e.description LIKE ?
+                OR v.name LIKE ?
+                OR v.city LIKE ?
+             )
+             ORDER BY e.date ASC, e.startTime ASC
+             LIMIT 5',
             [
                 "%{$keyword}%",
                 "%{$keyword}%",
@@ -245,12 +269,13 @@ class EventModel extends BaseModel
     {
         return $this->selectAll(
             'SELECT e.*, v.name AS venueName, v.city
-         FROM event e
-         JOIN venue v ON e.venueId = v.venueId
-         WHERE e.eventId != ?
-           AND (e.category = ? OR v.city = ?)
-         ORDER BY e.date ASC
-         LIMIT 4',
+             FROM event e
+             JOIN venue v ON e.venueId = v.venueId
+             WHERE e.status = "scheduled"
+             AND e.eventId != ?
+             AND (e.category = ? OR v.city = ?)
+             ORDER BY e.date ASC
+             LIMIT 4',
             [$eventId, $category, $city]
         );
     }
@@ -259,8 +284,8 @@ class EventModel extends BaseModel
     {
         $this->execute(
             'INSERT INTO event
-        (title, artist, category, description, venueId, createdByUserId, date, startTime, endTime, imageUrl, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            (title, artist, category, description, venueId, createdByUserId, date, startTime, endTime, imageUrl, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 $data['title'],
                 $data['artist'],
@@ -283,10 +308,10 @@ class EventModel extends BaseModel
     {
         return $this->selectAll(
             'SELECT e.*, v.name AS venueName, v.city
-         FROM event e
-         JOIN venue v ON e.venueId = v.venueId
-         WHERE e.status = ?
-         ORDER BY e.created_at DESC',
+             FROM event e
+             JOIN venue v ON e.venueId = v.venueId
+             WHERE e.status = ?
+             ORDER BY e.created_at DESC',
             ['pending']
         );
     }
@@ -303,13 +328,13 @@ class EventModel extends BaseModel
     {
         return $this->selectOne(
             'SELECT
-            (SELECT COUNT(*) FROM event) AS totalEvents,
-            (SELECT COUNT(*) FROM event WHERE status = "pending") AS pendingEvents,
-            (SELECT COUNT(*) FROM event WHERE status = "scheduled") AS activeEvents,
-            (SELECT COUNT(*) FROM event WHERE status = "completed") AS completedEvents,
-            (SELECT COUNT(*) FROM users) AS totalUsers,
-            (SELECT COUNT(*) FROM booking_ticket) AS ticketsSold,
-            (SELECT COALESCE(SUM(pricePaid), 0) FROM booking_ticket) AS totalRevenue'
+                (SELECT COUNT(*) FROM event) AS totalEvents,
+                (SELECT COUNT(*) FROM event WHERE status = "pending") AS pendingEvents,
+                (SELECT COUNT(*) FROM event WHERE status = "scheduled") AS activeEvents,
+                (SELECT COUNT(*) FROM event WHERE status = "completed") AS completedEvents,
+                (SELECT COUNT(*) FROM users) AS totalUsers,
+                (SELECT COUNT(*) FROM booking_ticket) AS ticketsSold,
+                (SELECT COALESCE(SUM(pricePaid), 0) FROM booking_ticket) AS totalRevenue'
         );
     }
 
@@ -317,16 +342,16 @@ class EventModel extends BaseModel
     {
         return $this->selectAll(
             'SELECT
-            e.eventId,
-            e.title,
-            e.date,
-            e.status,
-            COUNT(t.ticketId) AS tickets
-         FROM event e
-         LEFT JOIN ticket t ON e.eventId = t.eventId
-         GROUP BY e.eventId
-         ORDER BY e.created_at DESC
-         LIMIT 5'
+                e.eventId,
+                e.title,
+                e.date,
+                e.status,
+                COUNT(t.ticketId) AS tickets
+             FROM event e
+             LEFT JOIN ticket t ON e.eventId = t.eventId
+             GROUP BY e.eventId
+             ORDER BY e.created_at DESC
+             LIMIT 5'
         );
     }
 
@@ -334,11 +359,21 @@ class EventModel extends BaseModel
     {
         return $this->selectAll(
             'SELECT
-            category,
-            COUNT(*) AS total
-         FROM event
-         GROUP BY category
-         ORDER BY total DESC'
+                category,
+                COUNT(*) AS total
+             FROM event
+             GROUP BY category
+             ORDER BY total DESC'
+        );
+    }
+
+    public function findAllForAdmin(): array
+    {
+        return $this->selectAll(
+            'SELECT e.*, v.name AS venueName, v.city
+             FROM event e
+             JOIN venue v ON e.venueId = v.venueId
+             ORDER BY e.created_at DESC'
         );
     }
 }

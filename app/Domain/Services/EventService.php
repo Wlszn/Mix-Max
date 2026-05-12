@@ -6,17 +6,21 @@ use App\Domain\Models\EventModel;
 use App\Domain\Models\TicketModel;
 use App\Domain\Models\VenueModel;
 use App\Helpers\Core\PDOService;
+use App\Domain\Services\CloudinaryService;
 
 class EventService extends BaseService
 {
     private EventModel $eventModel;
     private TicketModel $ticketModel;
     private VenueModel $venueModel;
-    public function __construct(PDOService $db_service)
+    private CloudinaryService $cloudinaryService;
+
+    public function __construct(PDOService $db_service, CloudinaryService $cloudinaryService)
     {
         $this->eventModel = new EventModel($db_service);
         $this->ticketModel = new TicketModel($db_service);
         $this->venueModel = new VenueModel($db_service);
+        $this->cloudinaryService = $cloudinaryService;
     }
 
     public function createEvent(array $data): int
@@ -34,39 +38,15 @@ class EventService extends BaseService
             'imageUrl' => null
         ]);
 
-        $imageUrl = !empty($data['imageUrl']) ? trim($data['imageUrl']) : null;
-
         $imageUrl = null;
-
 
         if (
             isset($files['eventImageFile']) &&
-            $files['eventImageFile']['error'] === UPLOAD_ERR_OK
+            ($files['eventImageFile']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK
         ) {
-            $uploadDir = APP_BASE_DIR_PATH . '/public/uploads/events/';
-
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            $extension = pathinfo(
-                $files['eventImageFile']['name'],
-                PATHINFO_EXTENSION
+            $imageUrl = $this->uploadToCloudinary(
+                $files['eventImageFile']['tmp_name']
             );
-
-            $fileName = uniqid('event_', true) . '.' . $extension;
-
-            move_uploaded_file(
-                $files['eventImageFile']['tmp_name'],
-                $uploadDir . $fileName
-            );
-
-            $imageUrl = '/uploads/events/' . $fileName;
-        }
-
-
-        if (!$imageUrl && !empty($data['imageUrl'])) {
-            $imageUrl = trim($data['imageUrl']);
         }
 
         $eventId = $this->eventModel->createAndReturnId([
@@ -167,6 +147,7 @@ class EventService extends BaseService
     {
         return $this->eventModel->findPendingEvents();
     }
+
     public function updateEventStatus(int $eventId, string $status): bool
     {
         return $this->eventModel->updateStatus($eventId, $status);
@@ -181,5 +162,13 @@ class EventService extends BaseService
         ];
     }
 
+    public function getAllEventsForAdmin(): array
+    {
+        return $this->eventModel->findAllForAdmin();
+    }
 
+    private function uploadToCloudinary(string $source): ?string
+    {
+        return $this->cloudinaryService->uploadEventImage($source);
+    }
 }

@@ -86,11 +86,6 @@ $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
                                     <input name="eventImageFile" type="file" accept="image/*" class="w-full form-input">
                                 </div>
 
-                                <div>
-                                    <p class="text-xs text-slate-500 mb-1">Or paste image URL</p>
-                                    <input name="imageUrl" type="url" class="w-full form-input"
-                                        placeholder="https://example.com/event-image.jpg">
-                                </div>
                             </div>
 
                             <p class="text-xs text-slate-500 mt-2">

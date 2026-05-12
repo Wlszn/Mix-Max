@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Services\EventService;
 use App\Domain\Services\TwilioVerifyService;
+use App\Domain\Services\CloudinaryService;
 use App\Domain\Services\UserService;
 use App\Helpers\Core\AppSettings;
 use App\Helpers\Core\JsonRenderer;
@@ -47,7 +48,7 @@ $definitions = [
     },
 
     EventService::class => function (ContainerInterface $container): EventService {
-        return new EventService($container->get(PDOService::class));
+        return new EventService($container->get(PDOService::class), $container->get(CloudinaryService::class));
     },
 
     UserService::class => function (ContainerInterface $container): UserService {
@@ -63,6 +64,14 @@ $definitions = [
         );
     },
 
+    CloudinaryService::class => function (ContainerInterface $container): CloudinaryService {
+        $cloudinary = $container->get(AppSettings::class)->get('cloudinary');
+        return new CloudinaryService(
+            $cloudinary['cloud_name'] ?? '',
+            $cloudinary['api_key'] ?? '',
+            $cloudinary['api_secret'] ?? ''
+        );
+    },
     // HTTP factories
     ResponseFactoryInterface::class      => fn() => new ResponseFactory(),
     ServerRequestFactoryInterface::class => fn() => new ServerRequestFactory(),

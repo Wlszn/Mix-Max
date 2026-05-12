@@ -23,10 +23,30 @@ return static function (Slim\App $app): void {
     $app->post('/events', [EventController::class, 'store'])->setName('events.store');
 
     // —— Admin Events ────────────────────────────────────────────────
-    $app->get('/admin/events', [EventController::class, 'adminPending'])->setName('admin.events');
+    // Admin Dashboard
     $app->get('/admin', [EventController::class, 'adminDashboard'])
-    ->setName('admin.dashboard');
+        ->setName('admin.dashboard');
 
+    // Admin event review
+    $app->get('/admin/events', [EventController::class, 'adminPending'])
+        ->setName('admin.events');
+
+    // Admin manage all events
+    $app->get('/admin/events/manage', [EventController::class, 'adminManageEvents'])
+        ->setName('admin.events.manage');
+
+    $app->post('/admin/events/{id}/delete', [EventController::class, 'adminDeleteEvent'])
+        ->setName('admin.events.delete');
+
+    // Admin manage users
+    $app->get('/admin/users', [AuthController::class, 'adminManageUsers'])
+        ->setName('admin.users');
+
+    $app->post('/admin/users/{id}/delete', [AuthController::class, 'adminDeleteUser'])
+        ->setName('admin.users.delete');
+
+    $app->post('/admin/users/{id}/role', [AuthController::class, 'adminUpdateUserRole'])
+        ->setName('admin.users.role');
     $app->post('/admin/events/{id}/approve', [EventController::class, 'approve'])
         ->setName('admin.events.approve');
 

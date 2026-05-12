@@ -93,4 +93,21 @@ class UserModel extends BaseModel
             ['admin', $id]
         );
     }
+
+    public function findAll(): array
+    {
+        return $this->selectAll(
+            'SELECT userId, username, email, phone, role
+         FROM users
+         ORDER BY userId DESC'
+        );
+    }
+
+    public function updateRole(int $id, string $role): bool
+    {
+        return (bool) $this->execute(
+            'UPDATE users SET role = ? WHERE userId = ?',
+            [$role, $id]
+        );
+    }
 }
