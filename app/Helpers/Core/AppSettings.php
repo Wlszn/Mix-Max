@@ -37,6 +37,11 @@ class AppSettings
      */
     public function get(string $key = ''): mixed
     {
-        return (empty($key)) ? $this->settings : $this->settings[$key];
+        if (empty($key)) {
+            return $this->settings;
+        }
+        
+        // Return the value if it exists, otherwise return an empty array
+        return $this->settings[$key] ?? [];
     }
 }
