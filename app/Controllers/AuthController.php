@@ -77,41 +77,41 @@ class AuthController extends BaseController
         }
         // ---------------------   Check if user has a phone number on file for OTP
 
-        if (empty($user['phone'])) {
-            $_SESSION['flash_errors'] = [
-                'general' => 'No phone number on file. Please contact support or re-register.'
-            ];
-            $_SESSION['flash_old'] = ['email' => $email];
-            return $this->redirect($request, $response, 'auth.login');
-        }
+        // if (empty($user['phone'])) {
+        //     $_SESSION['flash_errors'] = [
+        //         'general' => 'No phone number on file. Please contact support or re-register.'
+        //     ];
+        //     $_SESSION['flash_old'] = ['email' => $email];
+        //     return $this->redirect($request, $response, 'auth.login');
+        // }
 
-        try {
-            $sent = $this->twilioService->sendOtp($user['phone']);
-        } catch (RuntimeException $e) {
-            $_SESSION['flash_errors'] = ['general' => 'Could not send verification code. Please try again.'];
-            return $this->redirect($request, $response, 'auth.login');
-        }
+        // try {
+        //     $sent = $this->twilioService->sendOtp($user['phone']);
+        // } catch (RuntimeException $e) {
+        //     $_SESSION['flash_errors'] = ['general' => 'Could not send verification code. Please try again.'];
+        //     return $this->redirect($request, $response, 'auth.login');
+        // }
 
-        if (!$sent) {
-            $_SESSION['flash_errors'] = ['general' => 'Could not send verification code. Please try again.'];
-            return $this->redirect($request, $response, 'auth.login');
-        }
+        // if (!$sent) {
+        //     $_SESSION['flash_errors'] = ['general' => 'Could not send verification code. Please try again.'];
+        //     return $this->redirect($request, $response, 'auth.login');
+        // }
 
         //----------------- comment the section here to disable the OTP to save credits
 
         //Store pending OTP state — user is NOT logged in yet
 
-        $_SESSION['otp_user_id'] = $user['userId'];
-        $_SESSION['otp_phone'] = $user['phone'];
-        $_SESSION['otp_sent_at'] = time();
-        return $this->redirect($request, $response, 'auth.verify');
+        // $_SESSION['otp_user_id'] = $user['userId'];
+        // $_SESSION['otp_phone'] = $user['phone'];
+        // $_SESSION['otp_sent_at'] = time();
+        // return $this->redirect($request, $response, 'auth.verify');
 
         // ---------------------   If you want to disable OTP for testing, just log the user in directly here:
 
-        // $_SESSION['user']          = $user;
-        // $_SESSION['cart_count']    = count($_SESSION['cart'] ?? []);
-        // $_SESSION['flash_success'] = 'Welcome back, ' . htmlspecialchars($user['username']) . '!';
-        // return $this->redirect($request, $response, 'home.index');
+        $_SESSION['user']          = $user;
+        $_SESSION['cart_count']    = count($_SESSION['cart'] ?? []);
+        $_SESSION['flash_success'] = 'Welcome back, ' . htmlspecialchars($user['username']) . '!';
+        return $this->redirect($request, $response, 'home.index');
 
         // ---------------------   testing on here comment and uncomment the section above to enable OTP again
 
