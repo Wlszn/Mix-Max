@@ -3,8 +3,7 @@ $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
     ? '/' . APP_ROOT_DIR_NAME
     : '';
 
-$cart = $_SESSION['payment_tickets'];
-
+$cart = $_SESSION['payment_tickets'] ?? [];
 $totalPrice = array_sum(array_column($cart, 'price'));
 ?>
 
@@ -15,6 +14,7 @@ $totalPrice = array_sum(array_column($cart, 'price'));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body class="bg-gray-50">
 
@@ -53,35 +53,69 @@ $totalPrice = array_sum(array_column($cart, 'price'));
     <!-- Payment Form Section -->
     <div class="bg-white shadow-md rounded-lg p-6">
         <h2 class="text-2xl font-semibold mb-4">Credit Card Information</h2>
-        <form action="#" method="post" class="space-y-4">
+        
+        <!-- Single form - not nested -->
+        <form id="payment-form" method="post" action="<?= $basePath ?>/process-payment" class="space-y-4">
             <div>
                 <label for="cardholder-name" class="block text-sm font-medium text-gray-700">Cardholder Name</label>
                 <input type="text" id="cardholder-name" name="cardholder_name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
             </div>
+            
+            <!-- Stripe Card Element -->
             <div>
-                <label for="card-number" class="block text-sm font-medium text-gray-700">Card Number</label>
-                <input type="text" id="card-number" name="card_number" placeholder="1234 5678 9012 3456" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Card Details</label>
+                <div id="card-element" class="border border-gray-300 rounded-md p-3"></div>
+                <div id="card-errors" class="text-red-600 text-sm mt-2 hidden"></div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label for="expiration-date" class="block text-sm font-medium text-gray-700">Expiration Date</label>
-                    <input type="text" id="expiration-date" name="expiration_date" placeholder="MM/YY" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div>
-                    <label for="cvv" class="block text-sm font-medium text-gray-700">CVV</label>
-                    <input type="text" id="cvv" name="cvv" placeholder="123" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-            </div>
+            
             <div class="pt-4">
-                <form method="post" action="<?= $basePath ?>/cart/process-payment">
-                <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                    Pay Now
+                <button type="submit" id="submit-btn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    Pay $<?= number_format($totalPrice, 2) ?>
                 </button>
-                </form>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+const stripe = Stripe('<?= $stripePublicKey ?? '' ?>');
+const elements = stripe.elements();
+const cardElement = elements.create('card');
+cardElement.mount('#card-element');
+
+const form = document.getElementById('payment-form');
+const cardErrors = document.getElementById('card-errors');
+const submitBtn = document.getElementById('submit-btn');
+
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+    
+    const {paymentMethod, error} = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: {
+            name: document.getElementById('cardholder-name').value,
+        },
+    });
+    
+    if (error) {
+        cardErrors.textContent = error.message;
+        cardErrors.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Pay $<?= number_format($totalPrice, 2) ?>';
+    } else {
+        // Add payment method ID to form and submit
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'paymentMethodId';
+        hiddenInput.value = paymentMethod.id;
+        form.appendChild(hiddenInput);
+        form.submit();
+    }
+});
+</script>
 
 <?php require __DIR__ . '/../common/js-scripts.php'; ?>
 <?php require __DIR__ . '/../common/footer.php'; ?>
