@@ -28,7 +28,7 @@ class BookingService extends BaseService
             $totalPrice += (float)$item['price'];
         }
 
-        $bookingId = $this->bookingModel->create([$userId, $totalPrice]);
+        $bookingId = $this->bookingModel->create([$userId ,$totalPrice]);
 
         if (!$bookingId) {
             return false;
