@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Services\EventService;
 use App\Domain\Services\TwilioVerifyService;
+use App\Domain\Services\CloudinaryService;
 use App\Domain\Services\UserService;
 use App\Helpers\Core\AppSettings;
 use App\Helpers\Core\JsonRenderer;
@@ -63,6 +64,16 @@ $definitions = [
             $twilio['verify_service_sid'] ?? ''
         );
     },
+
+    CloudinaryService::class => function ($container) {
+    $settings = $container->get(App\Helpers\Core\AppSettings::class);
+
+    return new CloudinaryService(
+        $settings->get('cloudinary.cloud_name'),
+        $settings->get('cloudinary.api_key'),
+        $settings->get('cloudinary.api_secret')
+    );
+},
 
     // HTTP factories
     ResponseFactoryInterface::class      => fn() => new ResponseFactory(),

@@ -5,7 +5,6 @@ declare(strict_types=1);
 /**
  * env.php — copy of env.example.php with your real credentials.
  *
- * Add the Twilio block below alongside your existing DB settings.
  */
 
 return function (array $settings): array {
