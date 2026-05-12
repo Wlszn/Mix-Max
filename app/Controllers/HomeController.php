@@ -25,5 +25,10 @@ class HomeController extends BaseController
             'page_title' => 'Mix Max - Discover Amazing Events',
             'featuredEvents' => $this->eventService->getFeaturedEvents(3)
         ]);
+
+        $successMessage = $_SESSION['flash_success'] ?? null;
+        
+        // Clear flash messages after retrieving
+        unset($_SESSION['flash_success']);
     }
 }

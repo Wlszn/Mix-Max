@@ -14,6 +14,8 @@ $categories = [
     ['name' => 'Comedy', 'icon' => '☺', 'link' => $basePath . '/events?category=comedy']
 ];
 
+$successMessage = $successMessage ?? null;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -27,6 +29,8 @@ $categories = [
 <body class="bg-gray-50">
 
     <?php require __DIR__ . '/common/header.php'; ?>
+
+    <span><?= $successMessage ?></span>
 
     <div class="min-h-screen bg-gray-50">
         <section class="relative overflow-hidden bg-[#0b1020] text-white">
