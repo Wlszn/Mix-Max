@@ -172,87 +172,125 @@ class CartController extends BaseController
     ]);
 }
 
- public function processPayment(Request $request, Response $response): Response
-{
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    
-    $userId = $_SESSION['user']['userId'] ?? null;
-    if (!$userId) {
-        return $this->redirect($request, $response, 'auth.login');
-    }
-    
-    $tickets = $_SESSION['payment_tickets'] ?? [];
-    if (empty($tickets)) {
-        return $this->redirect($request, $response, 'cart.index');
-    }
-    
-    $totalPrice = array_sum(array_column($tickets, 'price'));
-    $paymentMethodId = $request->getParsedBody()['paymentMethodId'] ?? null;
-    
-    if (!$paymentMethodId) {
-        $_SESSION['flash_error'] = 'Invalid payment method';
-        return $this->redirect($request, $response, 'cart.payment');
-    }
-    
-    // Get Stripe secret key
-    $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
-    \Stripe\Stripe::setApiKey($stripeConfig['secret_key']);
-    
-    try {
-        // Create a PaymentIntent
-        $paymentIntent = \Stripe\PaymentIntent::create([
-            'amount' => (int)($totalPrice * 100),
-            'currency' => 'usd',
-            'payment_method' => $paymentMethodId,
-            'confirmation_method' => 'manual',
-            'confirm' => true,
-            'metadata' => [
-                'user_id' => $userId,
-                'ticket_ids' => implode(',', array_column($tickets, 'ticketId'))
-            ]
-        ]);
-        
-        if ($paymentIntent->status === 'succeeded') {
-            // Create booking
-            $bookingId = $this->bookingService->createBooking($userId, $tickets);
-            
-            if ($bookingId) {
-                // Set success flash message
-                $_SESSION['flash_success'] = '✅ Payment successful! Your booking has been confirmed. Booking ID: #' . $bookingId;
-                
-                // Clear the session data
-                unset($_SESSION['payment_tickets']);
-                $this->cartService->clearCart();
-                
-                // Redirect to home page with success message
-                return $this->redirect($request, $response, 'home.index');
-            }
+    public function processPayment(Request $request, Response $response): Response
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
-        
-        // Payment failed
-        $_SESSION['flash_error'] = 'Payment failed. Please try again.';
-        return $this->redirect($request, $response, 'cart.payment');
-        
-    } catch (\Exception $e) {
-        error_log("Payment error: " . $e->getMessage());
-        $_SESSION['flash_error'] = 'Payment error: ' . $e->getMessage();
-        return $this->redirect($request, $response, 'cart.payment');
+
+        $userId = $_SESSION['user']['userId'] ?? null;
+        if (!$userId) {
+            return $this->redirect($request, $response, 'auth.login');
+        }
+
+        $tickets = $_SESSION['payment_tickets'] ?? [];
+        if (empty($tickets)) {
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
+        if (empty($stripeConfig['secret_key'])) {
+            $_SESSION['flash_error'] = 'Stripe is not configured (missing secret key).';
+            return $this->redirect($request, $response, 'cart.payment');
+        }
+        \Stripe\Stripe::setApiKey($stripeConfig['secret_key']);
+
+        $uri      = $request->getUri();
+        $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== '' ? '/' . APP_ROOT_DIR_NAME : '';
+        $origin   = $uri->getScheme() . '://' . $uri->getAuthority() . $basePath;
+
+        $lineItems = [];
+        foreach ($tickets as $t) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency'     => 'usd',
+                    'unit_amount'  => (int) round(((float) ($t['price'] ?? 0)) * 100),
+                    'product_data' => [
+                        'name'        => 'Ticket #' . ($t['ticketId'] ?? '?'),
+                        'description' => 'Section ' . ($t['section'] ?? '-') . ', Row ' . ($t['rowLetter'] ?? '-') . ', Seat ' . ($t['seatNumber'] ?? '-'),
+                    ],
+                ],
+                'quantity' => 1,
+            ];
+        }
+
+        try {
+            $session = \Stripe\Checkout\Session::create([
+                'mode'                 => 'payment',
+                'payment_method_types' => ['card'],
+                'line_items'           => $lineItems,
+                'success_url'          => $origin . '/payment/result?status=success&session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url'           => $origin . '/payment/result?status=cancel',
+                'metadata'             => [
+                    'user_id'    => $userId,
+                    'ticket_ids' => implode(',', array_column($tickets, 'ticketId')),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            error_log('Stripe Checkout error: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Could not start payment: ' . $e->getMessage();
+            return $this->redirect($request, $response, 'cart.payment');
+        }
+
+        return $response
+            ->withHeader('Location', $session->url)
+            ->withStatus(303);
     }
-}
 
     public function paymentResult(Request $request, Response $response): Response
     {
-        $status = $request->getQueryParams()['status'] ?? 'unknown';
-        $bookingId = $request->getQueryParams()['booking_id'] ?? null;
-        $errorMessage = $request->getQueryParams()['message'] ?? null;
-        
-        return $this->render($response, 'cart/result.php', [
-            'page_title' => 'Payment Result',
-            'status' => $status,
-            'bookingId' => $bookingId,
-            'errorMessage' => $errorMessage
-        ]);
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $query     = $request->getQueryParams();
+        $status    = $query['status'] ?? 'unknown';
+        $sessionId = $query['session_id'] ?? null;
+
+        if ($status === 'cancel') {
+            $_SESSION['flash_error'] = 'Payment was canceled.';
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        if ($status !== 'success' || !$sessionId) {
+            $_SESSION['flash_error'] = 'Unknown payment status.';
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
+        \Stripe\Stripe::setApiKey($stripeConfig['secret_key']);
+
+        try {
+            $session = \Stripe\Checkout\Session::retrieve($sessionId);
+        } catch (\Exception $e) {
+            error_log('Stripe session retrieve error: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Could not verify payment.';
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        if (($session->payment_status ?? '') !== 'paid') {
+            $_SESSION['flash_error'] = 'Payment was not completed (status: ' . ($session->payment_status ?? 'unknown') . ').';
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        $userId  = $_SESSION['user']['userId'] ?? (int) ($session->metadata->user_id ?? 0);
+        $tickets = $_SESSION['payment_tickets'] ?? [];
+
+        if (!$userId || empty($tickets)) {
+            $_SESSION['flash_error'] = 'Payment succeeded but session expired before booking could be created. Contact support with reference ' . $session->id;
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        $bookingId = $this->bookingService->createBooking($userId, $tickets);
+
+        if (!$bookingId) {
+            $_SESSION['flash_error'] = 'Payment succeeded but booking could not be created. Contact support with reference ' . $session->id;
+            return $this->redirect($request, $response, 'cart.index');
+        }
+
+        $_SESSION['flash_success'] = '✅ Payment successful! Your booking has been confirmed. Booking ID: #' . $bookingId;
+        unset($_SESSION['payment_tickets']);
+        $this->cartService->clearCart();
+        return $this->redirect($request, $response, 'home.index');
     }
 }

@@ -11,7 +11,8 @@ $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
     : '';
 
 $flashSuccess = $_SESSION['flash_success'] ?? '';
-unset($_SESSION['flash_success']);
+$flashError   = $_SESSION['flash_error'] ?? '';
+unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 ?>
 
 <header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
@@ -137,6 +138,14 @@ unset($_SESSION['flash_success']);
     <div class="max-w-7xl mx-auto px-6 mt-4">
         <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-xl">
             <?= htmlspecialchars($flashSuccess) ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($flashError)): ?>
+    <div class="max-w-7xl mx-auto px-6 mt-4">
+        <div class="bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-xl">
+            <?= htmlspecialchars($flashError) ?>
         </div>
     </div>
 <?php endif; ?>

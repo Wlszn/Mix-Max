@@ -3,9 +3,8 @@ $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
     ? '/' . APP_ROOT_DIR_NAME
     : '';
 
-$cart = $tickets ?? []; // Use $tickets from controller, not $_SESSION directly
+$cart = $tickets ?? [];
 $totalPrice = $totalPrice ?? 0;
-$stripePublicKey = $stripePublicKey ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -15,7 +14,6 @@ $stripePublicKey = $stripePublicKey ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
 
@@ -52,82 +50,29 @@ $stripePublicKey = $stripePublicKey ?? '';
             <?php endif; ?>
         </div>
 
-        <!-- Payment Form Section -->
+        <!-- Checkout Button -->
         <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-2xl font-semibold mb-4">Credit Card Information</h2>
-            
-            <!-- Fixed form action -->
-            <form id="payment-form" method="post" action="<?= $basePath ?>/cart/process-payment" class="space-y-4">
-                <div>
-                    <label for="cardholder-name" class="block text-sm font-medium text-gray-700">Cardholder Name</label>
-                    <input type="text" id="cardholder-name" name="cardholder_name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                
-                <!-- Stripe Card Element -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Card Details</label>
-                    <div id="card-element" class="border border-gray-300 rounded-md p-3"></div>
-                    <div id="card-errors" class="text-red-600 text-sm mt-2 hidden"></div>
-                </div>
-                
-                <div class="pt-4">
-                    <button type="submit" id="submit-btn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                        Pay $<?= number_format($totalPrice, 2) ?>
-                    </button>
-                </div>
+            <p class="text-gray-600 mb-4">
+                You'll be redirected to Stripe's secure checkout page to complete payment.
+                Use test card <span class="font-mono font-semibold">4242 4242 4242 4242</span>, any future expiry, any CVC.
+            </p>
+
+            <form id="payment-form" method="post" action="<?= $basePath ?>/cart/process-payment">
+                <button type="submit" id="submit-btn" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-semibold">
+                    Pay $<?= number_format($totalPrice, 2) ?> with Stripe
+                </button>
             </form>
         </div>
     </div>
 </main>
 
 <script>
-<?php if (!empty($stripePublicKey)): ?>
-const stripe = Stripe('<?= $stripePublicKey ?>');
-const elements = stripe.elements();
-const cardElement = elements.create('card');
-cardElement.mount('#card-element');
-
 const form = document.getElementById('payment-form');
-const cardErrors = document.getElementById('card-errors');
 const submitBtn = document.getElementById('submit-btn');
-
-form.addEventListener('submit', async (event) => {
-    event.preventDefault();
+form.addEventListener('submit', () => {
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Processing...';
-    
-    const {paymentMethod, error} = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-        billing_details: {
-            name: document.getElementById('cardholder-name').value,
-        },
-    });
-    
-    if (error) {
-        cardErrors.textContent = error.message;
-        cardErrors.classList.remove('hidden');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Pay $<?= number_format($totalPrice, 2) ?>';
-    } else {
-        // Add payment method ID to form and submit
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'paymentMethodId';
-        hiddenInput.value = paymentMethod.id;
-        form.appendChild(hiddenInput);
-        form.submit();
-    }
+    submitBtn.textContent = 'Redirecting to Stripe…';
 });
-<?php else: ?>
-// Fallback for testing without Stripe
-document.getElementById('payment-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    alert('Stripe is not configured. This is a demo submission.');
-    // For testing, you can still submit
-    // this.submit();
-});
-<?php endif; ?>
 </script>
 
 <?php require __DIR__ . '/../common/js-scripts.php'; ?>
