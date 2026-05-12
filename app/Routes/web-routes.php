@@ -40,6 +40,10 @@ return static function (Slim\App $app): void {
     $app->get('/cart', [CartController::class, 'index'])->setName('cart.index');
     $app->post('/cart/add', [CartController::class, 'add'])->setName('cart.add');
     $app->post('/cart/remove', [CartController::class, 'remove'])->setName('cart.remove');
+    $app->post('/cart/clear', [CartController::class, 'clear'])->setName('cart.clear');
+    $app->get('/cart/payment', [CartController::class, 'payment'])->setName('cart.payment');
+    $app->post('/cart/buy', [CartController::class, 'buy'])->setName('cart.buy');
+    $app->post('/cart/buy-selected', [CartController::class, 'buySelected'])->setName('cart.buy-selected');
 
     // ── Profile ─────────────────────────────────────────────────────────────
     $app->get('/profile', [UserController::class, 'showProfile'])->setName('user.profile');
