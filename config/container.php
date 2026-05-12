@@ -47,7 +47,7 @@ $definitions = [
     },
 
     EventService::class => function (ContainerInterface $container): EventService {
-        return new EventService($container->get(PDOService::class));
+        return new EventService($container->get(PDOService::class), $container->get(CloudinaryService::class));
     },
 
     UserService::class => function (ContainerInterface $container): UserService {
@@ -65,16 +65,14 @@ $definitions = [
         );
     },
 
-    CloudinaryService::class => function ($container) {
-    $settings = $container->get(App\Helpers\Core\AppSettings::class);
-
-    return new CloudinaryService(
-        $settings->get('cloudinary.cloud_name'),
-        $settings->get('cloudinary.api_key'),
-        $settings->get('cloudinary.api_secret')
-    );
-},
-
+    CloudinaryService::class => function (ContainerInterface $container): CloudinaryService {
+        $cloudinary = $container->get(AppSettings::class)->get('cloudinary');
+        return new CloudinaryService(
+            $cloudinary['cloud_name'] ?? '',
+            $cloudinary['api_key'] ?? '',
+            $cloudinary['api_secret'] ?? ''
+        );
+    },
     // HTTP factories
     ResponseFactoryInterface::class      => fn() => new ResponseFactory(),
     ServerRequestFactoryInterface::class => fn() => new ServerRequestFactory(),
