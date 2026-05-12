@@ -4,6 +4,7 @@ $basePath = defined('APP_ROOT_DIR_NAME') && APP_ROOT_DIR_NAME !== ''
     : '';
 
 $cart = $cart ?? [];
+$totalPrice = array_sum(array_column($cart, 'price'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -46,7 +47,11 @@ $cart = $cart ?? [];
 
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-3xl font-bold text-gray-900 mb-6">Your Cart</h1>
-
+                   <p>
+                <?php if (isset($totalPrice)): ?>
+                    Total: $<?= number_format($totalPrice, 2) ?>
+                <?php endif; ?>
+                </p>
                 <?php if (count($cart) === 1): ?>
                     <?php foreach ($cart as $item): ?>
                         <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
@@ -149,6 +154,7 @@ $cart = $cart ?? [];
                         </button>
                     </form>
                 </div>
+                <br>
                 <?php endif; ?> 
             </div>
 
