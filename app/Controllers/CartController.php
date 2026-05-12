@@ -146,32 +146,31 @@ class CartController extends BaseController
     }
 
     public function payment(Request $request, Response $response): Response
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        
-        // Get tickets from session
-        $tickets = $_SESSION['payment_tickets'] ?? [];
-        
-        if (empty($tickets)) {
-            // No tickets selected, redirect to cart
-            return $this->redirect($request, $response, 'cart.index');
-        }
-        
-        $totalPrice = array_sum(array_column($tickets, 'price'));
-        
-        // Get Stripe public key from config
-        $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
-        $stripePublicKey = $stripeConfig['public_key'] ?? '';
-        
-        return $this->render($response, 'cart/payment.php', [
-            'page_title' => 'Payment',
-            'tickets' => $tickets,
-            'totalPrice' => $totalPrice,
-            'stripePublicKey' => $stripePublicKey
-        ]);
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
+    
+    // Get tickets from session
+    $tickets = $_SESSION['payment_tickets'] ?? [];
+    
+    if (empty($tickets)) {
+        return $this->redirect($request, $response, 'cart.index');
+    }
+    
+    $totalPrice = array_sum(array_column($tickets, 'price'));
+    
+    // Get Stripe public key from config
+    $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
+    $stripePublicKey = $stripeConfig['public_key'] ?? '';
+    
+    return $this->render($response, 'cart/payment.php', [
+        'page_title' => 'Payment',
+        'tickets' => $tickets,
+        'totalPrice' => $totalPrice,
+        'stripePublicKey' => $stripePublicKey  // Make sure this is passed
+    ]);
+}
 
     public function processPayment(Request $request, Response $response): Response
     {
