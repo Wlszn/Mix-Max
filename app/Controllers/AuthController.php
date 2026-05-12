@@ -19,7 +19,7 @@ class AuthController extends BaseController
     public function __construct(Container $container)
     {
         parent::__construct($container);
-        $this->userService   = $container->get(UserService::class);
+        $this->userService = $container->get(UserService::class);
         $this->twilioService = $container->get(TwilioVerifyService::class);
 
         if (session_status() === PHP_SESSION_NONE) {
@@ -37,8 +37,8 @@ class AuthController extends BaseController
 
         $data = [
             'page_title' => 'Sign In — Mix Max',
-            'errors'     => $_SESSION['flash_errors'] ?? [],
-            'old'        => $_SESSION['flash_old']    ?? [],
+            'errors' => $_SESSION['flash_errors'] ?? [],
+            'old' => $_SESSION['flash_old'] ?? [],
         ];
         unset($_SESSION['flash_errors'], $_SESSION['flash_old']);
 
@@ -52,17 +52,19 @@ class AuthController extends BaseController
     {
         unset($_SESSION['flash_errors'], $_SESSION['flash_old'], $_SESSION['otp_user_id']);
 
-        $body  = $request->getParsedBody();
-        $email = trim($body['email']    ?? '');
-        $pass  = $body['password']      ?? '';
+        $body = $request->getParsedBody();
+        $email = trim($body['email'] ?? '');
+        $pass = $body['password'] ?? '';
 
         $errors = [];
-        if (empty($email)) $errors['email']    = 'Email is required.';
-        if (empty($pass))  $errors['password'] = 'Password is required.';
+        if (empty($email))
+            $errors['email'] = 'Email is required.';
+        if (empty($pass))
+            $errors['password'] = 'Password is required.';
 
         if (!empty($errors)) {
             $_SESSION['flash_errors'] = $errors;
-            $_SESSION['flash_old']    = ['email' => $email];
+            $_SESSION['flash_old'] = ['email' => $email];
             return $this->redirect($request, $response, 'auth.login');
         }
 
@@ -70,11 +72,11 @@ class AuthController extends BaseController
 
         if ($user === false) {
             $_SESSION['flash_errors'] = ['general' => 'Invalid email or password.'];
-            $_SESSION['flash_old']    = ['email' => $email];
+            $_SESSION['flash_old'] = ['email' => $email];
             return $this->redirect($request, $response, 'auth.login');
         }
         // ---------------------   Check if user has a phone number on file for OTP
-        
+
         if (empty($user['phone'])) {
             $_SESSION['flash_errors'] = [
                 'general' => 'No phone number on file. Please contact support or re-register.'
@@ -100,7 +102,7 @@ class AuthController extends BaseController
         //Store pending OTP state — user is NOT logged in yet
 
         $_SESSION['otp_user_id'] = $user['userId'];
-        $_SESSION['otp_phone']   = $user['phone'];
+        $_SESSION['otp_phone'] = $user['phone'];
         $_SESSION['otp_sent_at'] = time();
         return $this->redirect($request, $response, 'auth.verify');
 
@@ -112,7 +114,7 @@ class AuthController extends BaseController
         // return $this->redirect($request, $response, 'home.index');
 
         // ---------------------   testing on here comment and uncomment the section above to enable OTP again
-        
+
     }
 
     // ─── Show OTP Verify Form ─────────────────────────────────────────────────
@@ -131,11 +133,11 @@ class AuthController extends BaseController
         }
 
         $data = [
-            'page_title'   => 'Enter Verification Code — Mix Max',
+            'page_title' => 'Enter Verification Code — Mix Max',
             'masked_phone' => $this->maskPhone($_SESSION['otp_phone'] ?? ''),
             'seconds_left' => max(0, 30 - (time() - ($_SESSION['otp_sent_at'] ?? 0))),
-            'errors'       => $_SESSION['flash_errors'] ?? [],
-            'success'      => $_SESSION['flash_success'] ?? '',
+            'errors' => $_SESSION['flash_errors'] ?? [],
+            'success' => $_SESSION['flash_success'] ?? '',
         ];
         unset($_SESSION['flash_errors'], $_SESSION['flash_success']);
 
@@ -178,8 +180,8 @@ class AuthController extends BaseController
             return $this->redirect($request, $response, 'auth.login');
         }
 
-        $_SESSION['user']          = $user;
-        $_SESSION['cart_count']    = count($_SESSION['cart'] ?? []);
+        $_SESSION['user'] = $user;
+        $_SESSION['cart_count'] = count($_SESSION['cart'] ?? []);
         $_SESSION['flash_success'] = 'Welcome back, ' . htmlspecialchars($user['username']) . '!';
 
         return $this->redirect($request, $response, 'home.index');
@@ -201,7 +203,7 @@ class AuthController extends BaseController
 
         try {
             $this->twilioService->sendOtp($_SESSION['otp_phone']);
-            $_SESSION['otp_sent_at']   = time();
+            $_SESSION['otp_sent_at'] = time();
             $_SESSION['flash_success'] = 'A new code has been sent to your phone.';
         } catch (RuntimeException $e) {
             $_SESSION['flash_errors'] = ['general' => 'Could not resend code. Please try again.'];
@@ -220,8 +222,8 @@ class AuthController extends BaseController
 
         $data = [
             'page_title' => 'Create Account — Mix Max',
-            'errors'     => $_SESSION['flash_errors'] ?? [],
-            'old'        => $_SESSION['flash_old']    ?? [],
+            'errors' => $_SESSION['flash_errors'] ?? [],
+            'old' => $_SESSION['flash_old'] ?? [],
         ];
         unset($_SESSION['flash_errors'], $_SESSION['flash_old']);
 
@@ -234,12 +236,12 @@ class AuthController extends BaseController
     {
         unset($_SESSION['flash_errors'], $_SESSION['flash_old']);
 
-        $body    = $request->getParsedBody();
-        $username = trim($body['username']        ?? '');
-        $email    = trim($body['email']           ?? '');
-        $phone    = trim($body['phone']           ?? '');
-        $pass     = $body['password']             ?? '';
-        $confirm  = $body['confirm_password']     ?? '';
+        $body = $request->getParsedBody();
+        $username = trim($body['username'] ?? '');
+        $email = trim($body['email'] ?? '');
+        $phone = trim($body['phone'] ?? '');
+        $pass = $body['password'] ?? '';
+        $confirm = $body['confirm_password'] ?? '';
 
         $errors = [];
         if (empty($username))
@@ -259,7 +261,7 @@ class AuthController extends BaseController
 
         if (!empty($errors)) {
             $_SESSION['flash_errors'] = $errors;
-            $_SESSION['flash_old']    = compact('username', 'email', 'phone');
+            $_SESSION['flash_old'] = compact('username', 'email', 'phone');
             return $this->redirect($request, $response, 'auth.register');
         }
 
@@ -267,7 +269,7 @@ class AuthController extends BaseController
 
         if ($result === false) {
             $_SESSION['flash_errors'] = ['general' => 'That email or username is already registered.'];
-            $_SESSION['flash_old']    = compact('username', 'email', 'phone');
+            $_SESSION['flash_old'] = compact('username', 'email', 'phone');
             return $this->redirect($request, $response, 'auth.register');
         }
 
@@ -292,7 +294,38 @@ class AuthController extends BaseController
 
     private function maskPhone(string $phone): string
     {
-        if (strlen($phone) < 7) return $phone;
+        if (strlen($phone) < 7)
+            return $phone;
         return substr($phone, 0, 5) . '***' . substr($phone, -4);
+    }
+
+    public function adminManageUsers(Request $request, Response $response): Response
+    {
+        $users = $this->userService->getAllUsers();
+
+        return $this->render($response, 'admin/users.php', [
+            'page_title' => 'Manage Users',
+            'users' => $users
+        ]);
+    }
+
+    public function adminDeleteUser(Request $request, Response $response, array $args): Response
+    {
+        $this->userService->deleteUser((int) $args['id']);
+
+        return $this->redirect($request, $response, 'admin.users');
+    }
+
+    public function adminUpdateUserRole(Request $request, Response $response, array $args): Response
+    {
+        $role = $request->getParsedBody()['role'] ?? 'user';
+
+        if (!in_array($role, ['user', 'admin'], true)) {
+            $role = 'user';
+        }
+
+        $this->userService->updateUserRole((int) $args['id'], $role);
+
+        return $this->redirect($request, $response, 'admin.users');
     }
 }

@@ -118,8 +118,18 @@ class UserService extends BaseService
         // TODO: implement
     }
 
+    public function getAllUsers(): array
+    {
+        return $this->userModel->findAll();
+    }
+
+    public function updateUserRole(int $userId, string $role): bool
+    {
+        return $this->userModel->updateRole($userId, $role);
+    }
+
     public function deleteUser(int $userId): void
     {
-        // TODO: implement
+        $this->userModel->delete($userId);
     }
 }

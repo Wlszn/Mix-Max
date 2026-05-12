@@ -10,7 +10,8 @@ declare(strict_types=1);
 
 $host = 'localhost';
 $port = '3306';
-$user = 'root';
+//$user = 'root';
+$user = 'mixmax_user';
 $password = '';
 $dbName = 'mix-max';
 

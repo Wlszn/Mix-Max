@@ -133,6 +133,14 @@ unset($_SESSION['flash_success']);
     </div>
 </header>
 
+<?php if (!empty($flashSuccess)): ?>
+    <div class="max-w-7xl mx-auto px-6 mt-4">
+        <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-xl">
+            <?= htmlspecialchars($flashSuccess) ?>
+        </div>
+    </div>
+<?php endif; ?>
+
 <body class="bg-slate-50 min-h-screen flex flex-col">
     <div id="page-loader"
         class="fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center transition-opacity duration-300">

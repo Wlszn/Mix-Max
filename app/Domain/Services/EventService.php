@@ -181,5 +181,12 @@ class EventService extends BaseService
         ];
     }
 
+    public function getAllEventsForAdmin(): array
+    {
+        return $this->eventModel->findAllForAdmin();
+    }
+
+
+
 
 }

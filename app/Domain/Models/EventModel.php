@@ -341,4 +341,14 @@ class EventModel extends BaseModel
          ORDER BY total DESC'
         );
     }
+
+    public function findAllForAdmin(): array
+    {
+        return $this->selectAll(
+            'SELECT e.*, v.name AS venueName, v.city
+         FROM event e
+         JOIN venue v ON e.venueId = v.venueId
+         ORDER BY e.created_at DESC'
+        );
+    }
 }
