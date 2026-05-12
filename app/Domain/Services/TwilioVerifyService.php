@@ -53,7 +53,11 @@ class TwilioVerifyService extends BaseService
             'Channel' => 'sms',
         ]);
 
-        return ($response['status'] ?? '') === 'pending';
+        $status = $response['status'] ?? '';
+        if ($status !== 'pending') {
+            throw new RuntimeException("Twilio returned unexpected status: '{$status}'");
+        }
+        return true;
     }
 
     // ─── Verify OTP ────────────────────────────────────────────────────────────

@@ -150,43 +150,15 @@ class CartController extends BaseController
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
+
+
+    $_SESSION['payment_tickets'] = $selectedCart;
     
-    // Get tickets from session
-    $tickets = $_SESSION['payment_tickets'] ?? [];
     
-    if (empty($tickets)) {
-        return $this->redirect($request, $response, 'cart.index');
-    }
-    
-    $totalPrice = array_sum(array_column($tickets, 'price'));
-    
-    // Get Stripe public key from config
-    $stripeConfig = $this->container->get(AppSettings::class)->get('stripe');
-    $stripePublicKey = $stripeConfig['public_key'] ?? '';
-    
-    return $this->render($response, 'cart/payment.php', [
-        'page_title' => 'Payment',
-        'tickets' => $tickets,
-        'totalPrice' => $totalPrice,
-        'stripePublicKey' => $stripePublicKey  // Make sure this is passed
-    ]);
 }
 
  public function processPayment(Request $request, Response $response): Response
 {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    
-    $userId = $_SESSION['user']['userId'] ?? null;
-    if (!$userId) {
-        return $this->redirect($request, $response, 'auth.login');
-    }
-    
-    $tickets = $_SESSION['payment_tickets'] ?? [];
-    if (empty($tickets)) {
-        return $this->redirect($request, $response, 'cart.index');
-    }
     
     $totalPrice = array_sum(array_column($tickets, 'price'));
     $paymentMethodId = $request->getParsedBody()['paymentMethodId'] ?? null;
@@ -239,6 +211,8 @@ class CartController extends BaseController
         error_log("Payment error: " . $e->getMessage());
         $_SESSION['flash_error'] = 'Payment error: ' . $e->getMessage();
         return $this->redirect($request, $response, 'cart.payment');
+
+
     }
 }
 

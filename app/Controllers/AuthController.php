@@ -88,12 +88,14 @@ class AuthController extends BaseController
         try {
             $sent = $this->twilioService->sendOtp($user['phone']);
         } catch (RuntimeException $e) {
-            $_SESSION['flash_errors'] = ['general' => 'Could not send verification code. Please try again.'];
+            $this->logOtpFailure('sendOtp threw', $user['phone'] ?? '', $e->getMessage());
+            $_SESSION['flash_errors'] = ['general' => $this->otpErrorMessage($e->getMessage())];
             return $this->redirect($request, $response, 'auth.login');
         }
 
         if (!$sent) {
-            $_SESSION['flash_errors'] = ['general' => 'Could not send verification code. Please try again.'];
+            $this->logOtpFailure('sendOtp returned false (status != pending)', $user['phone'] ?? '', '');
+            $_SESSION['flash_errors'] = ['general' => $this->otpErrorMessage('Twilio did not return status=pending')];
             return $this->redirect($request, $response, 'auth.login');
         }
 
@@ -206,7 +208,8 @@ class AuthController extends BaseController
             $_SESSION['otp_sent_at'] = time();
             $_SESSION['flash_success'] = 'A new code has been sent to your phone.';
         } catch (RuntimeException $e) {
-            $_SESSION['flash_errors'] = ['general' => 'Could not resend code. Please try again.'];
+            $this->logOtpFailure('resend threw', $_SESSION['otp_phone'] ?? '', $e->getMessage());
+            $_SESSION['flash_errors'] = ['general' => $this->otpErrorMessage($e->getMessage())];
         }
 
         return $this->redirect($request, $response, 'auth.verify');
@@ -297,6 +300,36 @@ class AuthController extends BaseController
         if (strlen($phone) < 7)
             return $phone;
         return substr($phone, 0, 5) . '***' . substr($phone, -4);
+    }
+
+    private function isDevEnv(): bool
+    {
+        return in_array($_ENV['APP_ENV'] ?? 'dev', ['dev', 'docker'], true);
+    }
+
+    private function otpErrorMessage(string $detail): string
+    {
+        $base = 'Could not send verification code. Please try again.';
+        return $this->isDevEnv() && $detail !== ''
+            ? $base . ' [dev] ' . $detail
+            : $base;
+    }
+
+    private function logOtpFailure(string $context, string $phone, string $detail): void
+    {
+        $line = sprintf(
+            "[%s] OTP failure: %s | phone=%s | %s\n",
+            date('Y-m-d H:i:s'),
+            $context,
+            $this->maskPhone($phone),
+            $detail
+        );
+        $logDir = __DIR__ . '/../../var/logs';
+        if (!is_dir($logDir)) {
+            @mkdir($logDir, 0775, true);
+        }
+        @file_put_contents($logDir . '/auth.log', $line, FILE_APPEND);
+        error_log(trim($line));
     }
 
     public function adminManageUsers(Request $request, Response $response): Response
