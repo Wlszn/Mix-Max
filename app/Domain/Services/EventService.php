@@ -6,6 +6,7 @@ use App\Domain\Models\EventModel;
 use App\Domain\Models\TicketModel;
 use App\Domain\Models\VenueModel;
 use App\Helpers\Core\PDOService;
+use Cloudinary\Cloudinary;
 
 class EventService extends BaseService
 {
@@ -34,40 +35,7 @@ class EventService extends BaseService
             'imageUrl' => null
         ]);
 
-        $imageUrl = !empty($data['imageUrl']) ? trim($data['imageUrl']) : null;
-
-        $imageUrl = null;
-
-
-        if (
-            isset($files['eventImageFile']) &&
-            $files['eventImageFile']['error'] === UPLOAD_ERR_OK
-        ) {
-            $uploadDir = APP_BASE_DIR_PATH . '/public/uploads/events/';
-
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            $extension = pathinfo(
-                $files['eventImageFile']['name'],
-                PATHINFO_EXTENSION
-            );
-
-            $fileName = uniqid('event_', true) . '.' . $extension;
-
-            move_uploaded_file(
-                $files['eventImageFile']['tmp_name'],
-                $uploadDir . $fileName
-            );
-
-            $imageUrl = '/uploads/events/' . $fileName;
-        }
-
-
-        if (!$imageUrl && !empty($data['imageUrl'])) {
-            $imageUrl = trim($data['imageUrl']);
-        }
+        $imageUrl = $this->resolveEventImageUrl($files);
 
         $eventId = $this->eventModel->createAndReturnId([
             'title' => $data['title'],
@@ -91,6 +59,46 @@ class EventService extends BaseService
         );
 
         return true;
+    }
+
+    private function resolveEventImageUrl(array $files): ?string
+    {
+        if (
+            isset($files['eventImageFile']) &&
+            ($files['eventImageFile']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK
+        ) {
+            return $this->uploadToCloudinary($files['eventImageFile']['tmp_name']);
+        }
+
+        return null;
+    }
+    private function uploadToCloudinary(string $source): ?string
+    {
+        $cloudName = getenv('CLOUDINARY_CLOUD_NAME') ?: ($_ENV['CLOUDINARY_CLOUD_NAME'] ?? '');
+        $apiKey = getenv('CLOUDINARY_API_KEY') ?: ($_ENV['CLOUDINARY_API_KEY'] ?? '');
+        $apiSecret = getenv('CLOUDINARY_API_SECRET') ?: ($_ENV['CLOUDINARY_API_SECRET'] ?? '');
+
+        if ($cloudName === '' || $apiKey === '' || $apiSecret === '') {
+            return null;
+        }
+
+        $cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => $cloudName,
+                'api_key' => $apiKey,
+                'api_secret' => $apiSecret,
+            ],
+            'url' => [
+                'secure' => true
+            ]
+        ]);
+
+        $upload = $cloudinary->uploadApi()->upload($source, [
+            'folder' => 'mix-max/events',
+            'resource_type' => 'image'
+        ]);
+
+        return $upload['secure_url'] ?? null;
     }
 
     public function getAllEvents(): array
