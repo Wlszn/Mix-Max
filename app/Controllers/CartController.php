@@ -75,6 +75,14 @@ class CartController extends BaseController
         return $this->redirect($request, $response, 'cart.index');
     }
 
+    public function payment(Request $request, Response $response): Response
+    {
+        return $this->render($response, 'cart/payment.php', [
+            'page_title' => 'Payment',
+            'cart' => $this->cartService->getCart()
+        ]);
+    }
+
     public function buy(Request $request, Response $response): Response
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -110,6 +118,7 @@ class CartController extends BaseController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+
         $userId = $_SESSION['user']['userId'] ?? null;
         if (!$userId) {
             return $this->redirect($request, $response, 'auth.login');
@@ -117,7 +126,7 @@ class CartController extends BaseController
 
         $ticketIds = $request->getParsedBody()['ticketIds'] ?? [];
         if (!is_array($ticketIds) || empty($ticketIds)) {
-            return $this->redirect($request, $response, 'cart.index');
+            return $this->redirect($request, $response, 'cart.index', ['error' => 'No tickets selected']);
         }
 
         $cart = $this->cartService->getCart();

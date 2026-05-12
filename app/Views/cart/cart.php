@@ -99,7 +99,6 @@ $totalPrice = array_sum(array_column($cart, 'price'));
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <form method="post" action="<?= $basePath ?>/cart/buy-selected">
                         <div class="space-y-4">
                             <?php foreach ($cart as $item): ?>
                                 <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
@@ -131,7 +130,7 @@ $totalPrice = array_sum(array_column($cart, 'price'));
                                                 Price:
                                                 $<?= htmlspecialchars(is_array($item) ? ($item['price'] ?? '0.00') : '0.00') ?>
                                             </p>
-                                            </form>
+                                           
                                             <form method="post" action="<?= $basePath ?>/cart/remove" class="inline">
                                                 <input type="hidden" name="ticketId" value="<?= (int)$item['ticketId'] ?>">
                                                 <button class="mt-2 inline-block bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 font-semibold transition-colors">
@@ -144,9 +143,11 @@ $totalPrice = array_sum(array_column($cart, 'price'));
                             <?php endforeach; ?>
                         </div>
                         <div class="mt-6 flex flex-wrap items-center justify-center gap-4">
+                            <form method="post" action="<?= $basePath ?>/cart/buy-selected">
                             <button type="submit" class="bg-slate-950 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold transition-colors">
                                 Buy Selected
                             </button> 
+                            </form>
                   
                       <form method="post" action="<?= $basePath ?>/cart/clear" class="inline">
                         <button class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 font-semibold transition-colors">
