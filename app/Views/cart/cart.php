@@ -61,13 +61,12 @@ $totalPrice = array_sum(array_column($cart, 'price'));
                     <?php endforeach; ?>
                     
                 <?php else: ?>
-                    <!-- Display tickets without a wrapping form -->
-                    <div class="space-y-4 mb-6">
+                    <!-- Buy Selected Form with checkboxes INSIDE -->
+                    <form id="buySelectedForm" method="post" action="<?= $basePath ?>/cart/buy-selected">
                         <?php foreach ($cart as $item): ?>
-                            <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="border border-gray-200 rounded-lg p-4 mb-4">
                                 <div class="flex items-start gap-4">
-                                    <!-- Checkbox for buy selected - references the form below -->
-                                    <input type="checkbox" name="ticketIds[]" value="<?= (int)$item['ticketId'] ?>" class="mr-4 mt-1" form="buySelectedForm">
+                                    <input type="checkbox" name="ticketIds[]" value="<?= (int)$item['ticketId'] ?>" class="mr-4 mt-1">
                                     <div class="flex-grow text-left">
                                         <h2 class="text-lg font-semibold text-gray-900">Ticket</h2>
                                         <p class="text-sm text-gray-600">Ticket ID: <?= htmlspecialchars($item['ticketId'] ?? 'Unknown') ?></p>
@@ -76,23 +75,17 @@ $totalPrice = array_sum(array_column($cart, 'price'));
                                         <p class="text-sm text-gray-600">Seat Number: <?= htmlspecialchars($item['seatNumber'] ?? 'Unknown') ?></p>
                                         <p class="text-sm text-gray-600 font-semibold">Price: $<?= htmlspecialchars($item['price'] ?? '0.00') ?></p>
                                     </div>
-                                    <!-- Remove form - completely separate, not nested -->
                                     <div>
-                                        <form method="post" action="<?= $basePath ?>/cart/remove">
-                                            <input type="hidden" name="ticketId" value="<?= (int)$item['ticketId'] ?>">
-                                            <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
-                                                Remove
-                                            </button>
-                                        </form>
+                                        <!-- Remove button as a separate form (works because it's submitted via JavaScript) -->
+                                        <button type="button" onclick="removeTicket(<?= (int)$item['ticketId'] ?>)" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                                            Remove
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    </div>
-                    
-                    <!-- Buy Selected Form (separate, referenced by checkboxes) -->
-                    <form id="buySelectedForm" method="post" action="<?= $basePath ?>/cart/buy-selected">
-                        <div class="flex gap-4 justify-center">
+                        
+                        <div class="flex gap-4 justify-center mt-6">
                             <button type="submit" class="bg-slate-950 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold">
                                 Buy Selected
                             </button>
@@ -112,6 +105,23 @@ $totalPrice = array_sum(array_column($cart, 'price'));
         </div>
     </div>
 </main>
+
+<script>
+function removeTicket(ticketId) {
+    if (confirm('Remove this ticket from cart?')) {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '<?= $basePath ?>/cart/remove';
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ticketId';
+        input.value = ticketId;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 
 <?php require __DIR__ . '/../common/js-scripts.php'; ?>
 <?php require __DIR__ . '/../common/footer.php'; ?>
