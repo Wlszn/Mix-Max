@@ -127,10 +127,10 @@ class EventController extends BaseController
 
     public function adminPending(Request $request, Response $response): Response
     {
-        $events = $this->eventService->getPendingEvents();
+        $events = $this->eventService->getAllEventsForAdmin();
 
-        return $this->render($response, 'admin/admin-review.php', [
-            'page_title' => 'Review Events',
+        return $this->render($response, 'admin/events-manage.php', [
+            'page_title' => 'Manage Events',
             'events' => $events
         ]);
     }
