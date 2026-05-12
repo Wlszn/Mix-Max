@@ -28,12 +28,25 @@ class BookingService extends BaseService
             $totalPrice += (float)$item['price'];
         }
 
-        $bookingId = $this->bookingModel->create([$userId, $totalPrice]);
+        // Generate a unique booking reference
+        $bookingRef = 'BK-' . strtoupper(uniqid()) . '-' . rand(100, 999);
+        
+        // Prepare data as ASSOCIATIVE array (not indexed)
+        $bookingData = [
+            'userId' => $userId,
+            'bookingRef' => $bookingRef,
+            'date' => date('Y-m-d H:i:s'),
+            'totalPrice' => $totalPrice
+        ];
+
+        // Create the booking
+        $bookingId = $this->bookingModel->create($bookingData);
 
         if (!$bookingId) {
             return false;
         }
 
+        // Create booking ticket records
         foreach ($cart as $item) {
             $this->bookingTicketModel->create(
                 $bookingId,
